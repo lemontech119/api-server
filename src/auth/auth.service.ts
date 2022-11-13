@@ -15,7 +15,11 @@ export class AuthService {
     private httpService: HttpService,
   ) {}
   async login(code: string) {
-    return await this.getUserByKakaoAccessToken(code);
+    const userId = await this.getUserByKakaoAccessToken(code);
+
+    const accessToken = await this.getJwtAcessToken(Number(userId));
+
+    return accessToken;
   }
 
   async getUserByKakaoAccessToken(accessToken: string) {
@@ -40,13 +44,13 @@ export class AuthService {
       return await this.userRepository.save(data);
     }
 
-    return user;
+    return user.userId;
   }
-  async getJwtAcessToken(user: User) {
-    const payload = { user_id: user.userId };
+  async getJwtAcessToken(userId: number) {
+    const payload = { userId };
     const accessToken = await this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET,
-      expiresIn: process.env.AUTH_EXPPIRESIN,
+      secret: process.env.JWT_SECRET || 'test',
+      expiresIn: process.env.AUTH_EXPPIRESIN || '10m',
     });
     return {
       accessToken,
