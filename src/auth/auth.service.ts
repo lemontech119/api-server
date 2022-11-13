@@ -23,18 +23,19 @@ export class AuthService {
     const headers = {
       Authorization: `bearer ${accessToken}`,
     };
-    const auth = await this.httpService.get(url, { headers }).toPromise();
-    console.log(auth);
+    const auth = await this.httpService.axiosRef.get(url, { headers });
+
+    const { id, properties } = auth.data;
 
     if (!auth) throw new UnauthorizedException('Kakao OAuth Exception.');
     const user = await this.userRepository.findOne({
-      where: { userId: auth.data.id },
+      where: { userId: id },
     });
     if (!user) {
       const data = this.userRepository.create({
         id: uuid(),
-        userId: Number(auth.data.id),
-        nickname: auth.data.properties.nickname,
+        userId: Number(id),
+        nickname: properties.nickname,
       });
       return await this.userRepository.save(data);
     }

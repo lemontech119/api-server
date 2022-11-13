@@ -8,7 +8,6 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Post()
   login(@Body('code') code: string) {
-    console.log('@@@@@@');
     return this.authService.login(code);
   }
 }

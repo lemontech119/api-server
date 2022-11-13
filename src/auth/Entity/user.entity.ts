@@ -5,7 +5,7 @@ export class User {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
 
-  @Column()
+  @Column({ type: 'int', width: 20, unsigned: true })
   userId: number;
 
   @Column()
