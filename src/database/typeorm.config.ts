@@ -9,7 +9,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   port: parseInt(process.env.DB_PORT),
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
+  database: process.env.DB_NAME,
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
   migrationsTableName: 'custom_migration_table',
