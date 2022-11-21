@@ -12,16 +12,28 @@ export class User {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
 
-  @Column({ type: 'int', width: 20, unsigned: true })
+  @Column({ name: 'user_id', type: 'int', width: 20, unsigned: true })
   userId: number;
 
-  @Column()
+  @Column({ unique: true })
   nickname: string;
 
   @Column({ nullable: true })
   vendor: string;
 
+  @Column({})
+  image: string;
+
   @Column({ nullable: true })
+  gender: string;
+
+  @Column({ name: 'age_range', nullable: true })
+  ageRange: string;
+
+  @Column({ nullable: true })
+  email: string;
+
+  @Column({ name: 'refresh_token', nullable: true })
   @Exclude()
   refreshToken: string;
 

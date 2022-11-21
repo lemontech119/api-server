@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as dayjs from 'dayjs';
 import { User } from './Entity/user.entity';
 import { HttpService } from '@nestjs/axios';
 import { v4 as uuid } from 'uuid';
@@ -8,6 +9,8 @@ import { JwtService } from '@nestjs/jwt/dist';
 import { GetUserDto } from './dto/getUser.dto';
 import { LoginRequest } from './dto/loginRequest.dto';
 import { NotAcceptableException } from '@nestjs/common/exceptions';
+import { KakaoAuth } from './auth.types';
+import authConst from './auth.const';
 
 @Injectable()
 export class AuthService {
@@ -52,32 +55,48 @@ export class AuthService {
     };
   }
 
-  async getUserByKakaoAccessToken(data: LoginRequest) {
-    const { accessToken, vendor } = data;
+  async getUserByKakaoAccessToken(data: LoginRequest): Promise<User> {
+    const { accessToken } = data;
     const url = 'https://kapi.kakao.com/v2/user/me';
     const headers = {
       Authorization: `bearer ${accessToken}`,
     };
     const auth = await this.httpService.axiosRef.get(url, { headers });
 
-    const { id, properties } = auth.data;
-
+    const kakaoAuth: KakaoAuth = auth.data;
     if (!auth) throw new UnauthorizedException('Kakao OAuth Exception.');
+
     const user = await this.userRepository.findOne({
-      where: { userId: id },
+      where: { userId: kakaoAuth.id },
     });
+
     if (!user) {
-      const data = this.userRepository.create({
-        id: uuid(),
-        userId: Number(id),
-        nickname: properties.nickname,
-        vendor,
-      });
-      return await this.userRepository.save(data);
+      return await this.createKakaoUser(kakaoAuth);
     }
 
     return user;
   }
+
+  async createKakaoUser(kakaoAuth: KakaoAuth): Promise<User> {
+    const data = this.userRepository.create({
+      id: uuid(),
+      userId: kakaoAuth.id,
+      nickname: this.createDefaultNickname(),
+      vendor: authConst.VENDOR.KAKAO,
+      email: kakaoAuth.kakao_account.email,
+      image: kakaoAuth.kakao_account.profile.profile_image_url,
+      gender: kakaoAuth.kakao_account.gender,
+      ageRange: kakaoAuth.kakao_account.age_range,
+    });
+    return await this.userRepository.save(data);
+  }
+
+  createDefaultNickname(): string {
+    const dateFormat = dayjs().format('YYYYMMDDHHmm');
+    const random = Math.floor(1000 + Math.random() * 9000);
+    return `${dateFormat}${random}`;
+  }
+
   async getJwtAcessToken(userId: number, nickname: string) {
     const payload = { userId, nickname };
     const accessToken = await this.jwtService.sign(payload, {
