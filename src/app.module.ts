@@ -6,6 +6,10 @@ import { DataSource } from 'typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { typeOrmAsyncConfig } from 'src/database/typeorm.config';
 import { AuthModule } from 'src/auth/auth.module';
+import { PlaceModule } from './place/place.module';
+import { PlaceReviewModule } from './place_review/place_review.module';
+import { WantPlaceModule } from './want_place/want_place.module';
+import { PlaceMoodModule } from './place_mood/place_mood.module';
 
 @Module({
   imports: [
@@ -15,6 +19,10 @@ import { AuthModule } from 'src/auth/auth.module';
     }),
     TypeOrmModule.forRootAsync(typeOrmAsyncConfig),
     AuthModule,
+    PlaceModule,
+    PlaceReviewModule,
+    WantPlaceModule,
+    PlaceMoodModule,
   ],
   controllers: [AppController],
   providers: [AppService],

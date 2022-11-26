@@ -1,8 +1,12 @@
 import { Exclude } from 'class-transformer';
+import { PlaceReview } from 'src/place_review/Entity/place_review.entity';
+import { WantPlace } from 'src/want_place/Entity/want_place.entity';
+
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -14,6 +18,18 @@ export class User {
 
   @Column({ type: 'int', width: 20, unsigned: true })
   userId: number;
+
+  @OneToMany(() => PlaceReview, (placeReview) => placeReview.user, {
+    cascade: true,
+    eager: false,
+  })
+  place_Reviews: PlaceReview[];
+
+  @OneToMany(() => WantPlace, (wantPlace) => wantPlace.user, {
+    cascade: true,
+    eager: false,
+  })
+  want_places: WantPlace[];
 
   @Column()
   nickname: string;
