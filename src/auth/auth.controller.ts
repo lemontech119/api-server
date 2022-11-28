@@ -8,7 +8,12 @@ import {
   UseGuards,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiTags,
+  ApiHeader,
+} from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { GetUser } from 'src/decorator/get-user.decorator';
@@ -40,8 +45,10 @@ export class AuthController {
 
     return { nickname, userId };
   }
+
   @Get('logout')
   @ApiOperation({ summary: 'Logout', description: 'Logout' })
+  @ApiHeader({ name: 'Authorization', description: 'auth token' })
   @UseGuards(AuthGuard)
   async logout(
     @GetUser() getUserDto: GetUserDto,
