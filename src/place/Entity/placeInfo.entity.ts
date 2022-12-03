@@ -17,7 +17,6 @@ export class PlaceInfo {
   @OneToOne(() => Place, (place) => place.place_Info, {
     eager: false,
   })
-  @JoinColumn()
   place: Place;
 
   @Column()
@@ -26,11 +25,8 @@ export class PlaceInfo {
   @Column()
   address: string;
 
-  @Column()
-  road_address: string;
-
-  @Column()
-  detailed_address: string;
+  @Column({ name: 'road_address' })
+  roadAddress: string;
 
   @CreateDateColumn({
     type: 'timestamp',

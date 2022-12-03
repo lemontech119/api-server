@@ -11,7 +11,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { PlaceInfo } from './place_info.entity';
+import { PlaceInfo } from './placeInfo.entity';
 
 @Entity()
 export class Place {
@@ -32,7 +32,7 @@ export class Place {
 
   @OneToOne(() => PlaceInfo, (placeInfo) => placeInfo.place, {
     eager: false,
-    cascade: true,
+    cascade: ['insert'],
   })
   @JoinColumn()
   place_Info: PlaceInfo;
@@ -43,8 +43,8 @@ export class Place {
   @JoinColumn()
   want_place: WantPlace;
 
-  @Column()
-  kakao_id: string; // 카카오 측 id
+  @Column({ name: 'kakao_id' })
+  kakaoId: string; // 카카오 측 id
 
   @Column()
   name: string;
@@ -58,11 +58,11 @@ export class Place {
   @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
   y: number;
 
-  @Column()
-  review_cnt: number;
+  @Column({ name: 'review_cnt', default: 0 })
+  reviewCnt: number;
 
-  @Column({ type: 'float' })
-  rating_avrg: number;
+  @Column({ name: 'rating_avrg', default: 0, type: 'float' })
+  ratingAvrg: number;
 
   @CreateDateColumn({
     type: 'timestamp',
