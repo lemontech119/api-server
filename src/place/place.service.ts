@@ -5,7 +5,6 @@ import { Place } from './Entity/place.entity';
 import { PlaceInfo } from './Entity/placeInfo.entity';
 import { PlaceInfoService } from './placeInfo.service';
 import { AddPlace } from './dto/addPlace.dto';
-
 import { v4 as uuid } from 'uuid';
 
 @Injectable()
