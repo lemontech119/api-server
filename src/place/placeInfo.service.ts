@@ -22,4 +22,14 @@ export class PlaceInfoService {
 
     return placeInfo;
   }
+
+  async getPlaceInfoById(id: string): Promise<PlaceInfo> {
+    const placeInfo = await this.placeInfoRepository.findOne({
+      where: {
+        id,
+      },
+    });
+
+    return placeInfo;
+  }
 }
