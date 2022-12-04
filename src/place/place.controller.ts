@@ -19,6 +19,26 @@ export class PlaceController {
     private readonly placeInfoService: PlaceInfoService,
   ) {}
 
+  @Get('/exists/:kakaoId')
+  @ApiOperation({
+    summary: 'isExists',
+    description: '장소가 저장되어 있는지 여부',
+  })
+  @ApiParam({
+    name: 'kakaoId',
+    required: true,
+    description: '카카오 장소 id',
+  })
+  @ApiCreatedResponse({
+    description: '장소 저장 여부',
+    type: Boolean,
+  })
+  async isExsitsKakaoPlace(@Param('kakaoId') kakaoId) {
+    const isExists = await this.placeService.isExistsByKakaoId(kakaoId);
+
+    return isExists;
+  }
+
   @Post('/')
   @ApiOperation({ summary: 'Create', description: 'create place data' })
   @ApiCreatedResponse({
