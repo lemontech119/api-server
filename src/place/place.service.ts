@@ -16,6 +16,17 @@ export class PlaceService {
     private readonly placeInfoService: PlaceInfoService,
   ) {}
 
+  async isExistsByKakaoId(kakaoId: string): Promise<boolean> {
+    const ret = await this.placeRepository.findOne({
+      where: {
+        kakaoId,
+      },
+      select: ['id'],
+    });
+
+    return !!ret;
+  }
+
   async createPlace(newPlace: AddPlace): Promise<Place> {
     const place = new Place();
     place.id = uuid();
