@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PlaceInfo } from './Entity/placeInfo.entity';
 import { AddPlaceInfo } from './dto/addPlaceInfo.dto';
-import { v4 as uuid } from 'uuid';
+import { generateUuid } from './../utils/gnerator';
 
 @Injectable()
 export class PlaceInfoService {
@@ -15,7 +15,7 @@ export class PlaceInfoService {
   generatePlaceInfo(newPlaceInfo: AddPlaceInfo): PlaceInfo {
     const placeInfo = new PlaceInfo();
 
-    placeInfo.id = uuid();
+    placeInfo.id = generateUuid();
     placeInfo.url = newPlaceInfo.url;
     placeInfo.address = newPlaceInfo.address;
     placeInfo.roadAddress = newPlaceInfo.roadAddress;
