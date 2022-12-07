@@ -7,7 +7,15 @@ import { AuthGuard } from './../auth/security/jwt.Guard';
 import { PlaceService } from './../place/place.service';
 import { Place } from './../place/Entity/place.entity';
 import { AuthService } from 'src/auth/auth.service';
+import {
+  ApiBody,
+  ApiHeader,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Place-review Api')
 @Controller('place-review')
 export class PlaceReviewController {
   constructor(
@@ -16,6 +24,18 @@ export class PlaceReviewController {
     private readonly authService: AuthService,
   ) {}
 
+  @ApiOperation({ summary: 'createReview', description: 'createReview' })
+  @ApiHeader({ name: 'Authorization', description: 'auth token' })
+  @ApiBody({
+    description: 'CreatePlaceReviewDto',
+    required: true,
+    type: CreatePlaceReviewDto,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'placeReviewId',
+    type: String,
+  })
   @UseGuards(AuthGuard)
   @Post()
   async createReview(

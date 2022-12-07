@@ -4,7 +4,15 @@ import { AuthGuard } from './../auth/security/jwt.Guard';
 import { CreatePlaceMoodDto } from './dto/create.place_mood.dto';
 import { PlaceMood } from './Entity/place_mood.entity';
 import { PlaceReviewService } from 'src/place_review/place_review.service';
+import {
+  ApiBody,
+  ApiHeader,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Place-mood Api')
 @Controller('place-mood')
 export class PlaceMoodController {
   constructor(
@@ -12,6 +20,20 @@ export class PlaceMoodController {
     private readonly placeReviewService: PlaceReviewService,
   ) {}
 
+  @ApiOperation({ summary: 'createMood', description: 'createMood' })
+  @ApiHeader({ name: 'Authorization', description: 'auth token' })
+  @ApiBody({
+    description: 'CreatePlaceMoodDto',
+    required: true,
+    type: CreatePlaceMoodDto,
+    isArray: true,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Array of PlaceMood',
+    type: PlaceMood,
+    isArray: true,
+  })
   @UseGuards(AuthGuard)
   @Post()
   async createMood(@Body() createPlaceMoodDtos: CreatePlaceMoodDto[]) {
