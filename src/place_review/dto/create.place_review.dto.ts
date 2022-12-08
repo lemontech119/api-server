@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class CreatePlaceReviewDto {
   @ApiProperty({
@@ -49,4 +49,12 @@ export class CreatePlaceReviewDto {
   })
   @IsBoolean()
   is_reservation: boolean;
+
+  @ApiProperty({
+    description: 'placeMood',
+    type: String,
+    isArray: true,
+  })
+  @IsArray()
+  placeMood: string[];
 }

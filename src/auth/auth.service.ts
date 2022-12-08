@@ -61,10 +61,13 @@ export class AuthService {
     const headers = {
       Authorization: `bearer ${accessToken}`,
     };
-    const auth = await this.httpService.axiosRef.get(url, { headers });
-
-    const kakaoAuth: KakaoAuth = auth.data;
+    const auth = await this.httpService.axiosRef
+      .get(url, { headers })
+      .catch(() => {
+        throw new UnauthorizedException('Kakao OAuth Exception.');
+      });
     if (!auth) throw new UnauthorizedException('Kakao OAuth Exception.');
+    const kakaoAuth: KakaoAuth = auth.data;
 
     const user = await this.userRepository.findOne({
       where: { userId: kakaoAuth.id },
