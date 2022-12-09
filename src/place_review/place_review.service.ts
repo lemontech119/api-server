@@ -1,4 +1,4 @@
-import { Injectable, HttpException } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager } from 'typeorm';
 import { CreatePlaceReviewDto } from './dto/create.place_review.dto';
@@ -43,7 +43,7 @@ export class PlaceReviewService {
       const result = await queryRunnerManager.save(newReview);
       return result;
     } catch (err) {
-      throw new HttpException(err.message, err.status ? err.status : 500);
+      throw new ConflictException('Failed to Transaction');
     }
   }
 
