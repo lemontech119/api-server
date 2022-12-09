@@ -21,6 +21,7 @@ import {
   ApiBody,
   ApiHeader,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -37,12 +38,26 @@ export class PlaceReviewController {
     private readonly placeMoodService: PlaceMoodService,
     private readonly authService: AuthService,
   ) {}
-
+  @ApiOperation({ summary: 'findAll Review', description: 'Get Place Reviews' })
+  @ApiParam({ name: 'placeId', description: 'UUID', type: String })
+  @ApiResponse({
+    type: PlaceReview,
+    isArray: true,
+    description: 'Success',
+    status: 200,
+  })
   @Get()
   findAll(@Param('placeId') placeId: string): Promise<PlaceReview[]> {
     return this.placeReviewService.findByPlaceId(placeId);
   }
 
+  @ApiOperation({ summary: ' findOne', description: 'Get Review' })
+  @ApiParam({ name: 'id', description: 'UUID', type: String })
+  @ApiResponse({
+    type: PlaceReview,
+    description: 'Success',
+    status: 200,
+  })
   @Get('/:id')
   findOne(@Param('id') id: string): Promise<PlaceReview> {
     return this.placeReviewService.findById(id);
