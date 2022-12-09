@@ -4,6 +4,8 @@ import {
   Body,
   UseGuards,
   UseInterceptors,
+  Get,
+  Param,
 } from '@nestjs/common';
 import { PlaceReviewService } from './place_review.service';
 import { CreatePlaceReviewDto } from './dto/create.place_review.dto';
@@ -35,6 +37,16 @@ export class PlaceReviewController {
     private readonly placeMoodService: PlaceMoodService,
     private readonly authService: AuthService,
   ) {}
+
+  @Get()
+  findAll(@Param('placeId') placeId: string): Promise<PlaceReview[]> {
+    return this.placeReviewService.findByPlaceId(placeId);
+  }
+
+  @Get('/:id')
+  findOne(@Param('id') id: string): Promise<PlaceReview> {
+    return this.placeReviewService.findById(id);
+  }
 
   @ApiOperation({ summary: 'createReview', description: 'createReview' })
   @ApiHeader({ name: 'Authorization', description: 'auth token' })

@@ -13,6 +13,21 @@ export class PlaceReviewService {
     private readonly placeReviewRepository: Repository<PlaceReview>,
   ) {}
 
+  async findByPlaceId(placeId: string): Promise<PlaceReview[]> {
+    return this.placeReviewRepository.find({
+      relations: {
+        user: { nickname: true },
+        place_mood: true,
+      },
+      where: {
+        place: {
+          id: placeId,
+        },
+      },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async createReview(
     createPlaceReviewDto: CreatePlaceReviewDto,
     place: Place,
@@ -47,8 +62,8 @@ export class PlaceReviewService {
     }
   }
 
-  async findById(id: string): Promise<PlaceReview[]> {
-    return await this.placeReviewRepository.find({
+  async findById(id: string): Promise<PlaceReview> {
+    return await this.placeReviewRepository.findOne({
       relations: {
         place: true,
         place_mood: true,
