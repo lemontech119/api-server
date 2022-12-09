@@ -24,6 +24,7 @@ import {
 } from '@nestjs/swagger';
 import { TransactionManager } from 'src/decorator/transaction.decorator';
 import { EntityManager } from 'typeorm';
+import { PlaceReview } from './Entity/place_review.entity';
 
 @ApiTags('Place-review Api')
 @Controller('place-review')
@@ -44,8 +45,8 @@ export class PlaceReviewController {
   })
   @ApiResponse({
     status: 201,
-    description: 'placeReviewId',
-    type: String,
+    description: 'Place_Review Result',
+    type: PlaceReview,
   })
   @UseGuards(AuthGuard)
   @Post()
@@ -54,7 +55,7 @@ export class PlaceReviewController {
     @Body() createPlaceReviewDto: CreatePlaceReviewDto,
     @GetUser() kakaoUser: User,
     @TransactionManager() queryRunnerManager: EntityManager,
-  ) {
+  ): Promise<PlaceReview> {
     const place = await this.checkPlace(createPlaceReviewDto.placeId);
     const user = await this.authService.getUserbyKakaoId(kakaoUser.userId);
 
