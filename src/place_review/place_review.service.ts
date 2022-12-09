@@ -15,8 +15,9 @@ export class PlaceReviewService {
 
   async findByPlaceId(placeId: string): Promise<PlaceReview[]> {
     return this.placeReviewRepository.find({
+      select: { user: { nickname: true } },
       relations: {
-        user: { nickname: true },
+        user: true,
         place_mood: true,
       },
       where: {
