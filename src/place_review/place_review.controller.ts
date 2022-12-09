@@ -64,18 +64,20 @@ export class PlaceReviewController {
       user[0],
       queryRunnerManager,
     );
-    const result = [];
+
     for (const mood of createPlaceReviewDto.placeMood) {
-      const placeMoodResult = await this.placeMoodService.createPlaceMood(
+      await this.placeMoodService.createPlaceMood(
         newPlaceReview,
         place[0],
         mood,
         queryRunnerManager,
       );
-      result.push(placeMoodResult);
     }
 
-    return result;
+    return await this.placeReviewService.findByIndWithTransaction(
+      newPlaceReview.id,
+      queryRunnerManager,
+    );
   }
 
   async checkPlace(placeId: string): Promise<Place[]> {

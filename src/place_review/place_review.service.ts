@@ -51,10 +51,21 @@ export class PlaceReviewService {
     return await this.placeReviewRepository.find({
       relations: {
         place: true,
+        place_mood: true,
       },
       where: {
         id,
       },
+    });
+  }
+
+  async findByIndWithTransaction(
+    id: string,
+    transactionManager: EntityManager,
+  ): Promise<PlaceReview> {
+    return await transactionManager.findOne(PlaceReview, {
+      relations: { place_mood: true },
+      where: { id },
     });
   }
 }
