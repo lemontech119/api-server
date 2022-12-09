@@ -3,9 +3,9 @@ import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
 export class JwtRefreshGuard extends AuthGuard('jwt-refresh-token') {
-  handleRequest(err, user, info: Error) {
+  handleRequest(err: Error, user: any, info: Error) {
     if (err || info || !user) {
-      throw err || info || new UnauthorizedException();
+      throw new UnauthorizedException();
     }
 
     return user;

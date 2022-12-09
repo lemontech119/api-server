@@ -4,13 +4,13 @@ import { Repository } from 'typeorm';
 import * as dayjs from 'dayjs';
 import { User } from './Entity/user.entity';
 import { HttpService } from '@nestjs/axios';
-import { v4 as uuid } from 'uuid';
 import { JwtService } from '@nestjs/jwt/dist';
 import { GetUserDto } from './dto/getUser.dto';
 import { LoginRequest } from './dto/loginRequest.dto';
 import { NotAcceptableException } from '@nestjs/common/exceptions';
 import { KakaoAuth } from './auth.types';
 import authConst from './auth.const';
+import { generateUuid } from './../utils/gnerator';
 
 @Injectable()
 export class AuthService {
@@ -61,10 +61,13 @@ export class AuthService {
     const headers = {
       Authorization: `bearer ${accessToken}`,
     };
-    const auth = await this.httpService.axiosRef.get(url, { headers });
-
-    const kakaoAuth: KakaoAuth = auth.data;
+    const auth = await this.httpService.axiosRef
+      .get(url, { headers })
+      .catch(() => {
+        throw new UnauthorizedException('Kakao OAuth Exception.');
+      });
     if (!auth) throw new UnauthorizedException('Kakao OAuth Exception.');
+    const kakaoAuth: KakaoAuth = auth.data;
 
     const user = await this.userRepository.findOne({
       where: { userId: kakaoAuth.id },
@@ -79,7 +82,7 @@ export class AuthService {
 
   async createKakaoUser(kakaoAuth: KakaoAuth): Promise<User> {
     const data = this.userRepository.create({
-      id: uuid(),
+      id: generateUuid(),
       userId: kakaoAuth.id,
       nickname: this.createDefaultNickname(),
       vendor: authConst.VENDOR.KAKAO,
@@ -176,5 +179,13 @@ export class AuthService {
     } else {
       throw new UnauthorizedException();
     }
+  }
+
+  async getUserbyKakaoId(kakaoId: number): Promise<User[]> {
+    return await this.userRepository.find({
+      where: {
+        userId: kakaoId,
+      },
+    });
   }
 }

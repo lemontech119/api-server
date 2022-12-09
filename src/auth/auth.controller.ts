@@ -13,6 +13,8 @@ import {
   ApiOperation,
   ApiTags,
   ApiHeader,
+  ApiBody,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
@@ -26,8 +28,20 @@ import { JwtRefreshGuard } from './security/jwtRefresh.Guard';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  @Post()
+
   @ApiOperation({ summary: 'Login', description: 'Social login' })
+  @ApiBody({
+    description: 'login',
+    required: true,
+    type: LoginRequest,
+  })
+  @ApiResponse({
+    status: 201,
+    description:
+      'retrun Cookies: Authentication, Refresh Body: nickname, userId',
+    type: String,
+  })
+  @Post()
   async login(
     @Body() data: LoginRequest,
     @Res({ passthrough: true }) res: Response,
