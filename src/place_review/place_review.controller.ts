@@ -3,8 +3,9 @@ import {
   Post,
   Body,
   UseGuards,
-  ConflictException,
   UseInterceptors,
+  Get,
+  Param,
 } from '@nestjs/common';
 import { PlaceReviewService } from './place_review.service';
 import { CreatePlaceReviewDto } from './dto/create.place_review.dto';
@@ -20,11 +21,13 @@ import {
   ApiBody,
   ApiHeader,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { TransactionManager } from 'src/decorator/transaction.decorator';
 import { EntityManager } from 'typeorm';
+import { PlaceReview } from './Entity/place_review.entity';
 
 @ApiTags('Place-review Api')
 @Controller('place-review')
@@ -35,6 +38,30 @@ export class PlaceReviewController {
     private readonly placeMoodService: PlaceMoodService,
     private readonly authService: AuthService,
   ) {}
+  @ApiOperation({ summary: 'findAll Review', description: 'Get Place Reviews' })
+  @ApiParam({ name: 'placeId', description: 'UUID', type: String })
+  @ApiResponse({
+    type: PlaceReview,
+    isArray: true,
+    description: 'Success',
+    status: 200,
+  })
+  @Get()
+  findAll(@Param('placeId') placeId: string): Promise<PlaceReview[]> {
+    return this.placeReviewService.findByPlaceId(placeId);
+  }
+
+  @ApiOperation({ summary: ' findOne', description: 'Get Review' })
+  @ApiParam({ name: 'id', description: 'UUID', type: String })
+  @ApiResponse({
+    type: PlaceReview,
+    description: 'Success',
+    status: 200,
+  })
+  @Get('/:id')
+  findOne(@Param('id') id: string): Promise<PlaceReview> {
+    return this.placeReviewService.findById(id);
+  }
 
   @ApiOperation({ summary: 'createReview', description: 'createReview' })
   @ApiHeader({ name: 'Authorization', description: 'auth token' })
@@ -45,8 +72,8 @@ export class PlaceReviewController {
   })
   @ApiResponse({
     status: 201,
-    description: 'placeReviewId',
-    type: String,
+    description: 'Place_Review Result',
+    type: PlaceReview,
   })
   @UseGuards(AuthGuard)
   @Post()
@@ -55,7 +82,7 @@ export class PlaceReviewController {
     @Body() createPlaceReviewDto: CreatePlaceReviewDto,
     @GetUser() kakaoUser: User,
     @TransactionManager() queryRunnerManager: EntityManager,
-  ) {
+  ): Promise<PlaceReview> {
     const place = await this.checkPlace(createPlaceReviewDto.placeId);
     const user = await this.authService.getUserbyKakaoId(kakaoUser.userId);
 
@@ -65,18 +92,20 @@ export class PlaceReviewController {
       user[0],
       queryRunnerManager,
     );
-    const result = [];
+
     for (const mood of createPlaceReviewDto.placeMood) {
-      const placeMoodResult = await this.placeMoodService.createPlaceMood(
+      await this.placeMoodService.createPlaceMood(
         newPlaceReview,
         place[0],
         mood,
         queryRunnerManager,
       );
-      result.push(placeMoodResult);
     }
 
-    return result;
+    return await this.placeReviewService.findByIndWithTransaction(
+      newPlaceReview.id,
+      queryRunnerManager,
+    );
   }
 
   async checkPlace(placeId: string): Promise<Place[]> {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager } from 'typeorm';
 import { PlaceMood } from './Entity/place_mood.entity';
@@ -24,6 +24,8 @@ export class PlaceMoodService {
     placeMood.mood = mood;
     try {
       return await queryRunnerManager.save(placeMood);
-    } catch (err) {}
+    } catch (err) {
+      throw new ConflictException('Failed to Transaction');
+    }
   }
 }
