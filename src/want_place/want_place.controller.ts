@@ -16,6 +16,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { AuthGuard } from 'src/auth/security/jwt.Guard';
 import { CreateWantPlaceDto } from './dto/create.wantPlace.dto';
 import { DeleteWantPlaceDto } from './dto/delete.wantPlace.dto';
+import { WantPlaceAndPlace } from './types/wantPlaceAndPlace.type';
 import { DeleteResult } from 'typeorm';
 import { ApiBody, ApiHeader, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
@@ -27,15 +28,18 @@ export class WantPlaceController {
     private readonly authService: AuthService,
   ) {}
 
-  @ApiOperation({ summary: 'Get WantPlace', description: 'Get WanPlace List' })
+  @ApiOperation({
+    summary: 'Get my WantPlaces',
+    description: 'Get my WanPlace List',
+  })
   @ApiHeader({ name: 'Authorization', description: 'auth token' })
   @ApiResponse({
     status: 200,
     description: 'Want_palce Result',
-    type: WantPlace,
+    type: WantPlaceAndPlace,
     isArray: true,
   })
-  @Get()
+  @Get('/my/list')
   @UseGuards(AuthGuard)
   async findByUser(@GetUser() user: User) {
     const userInfo = await this.authService.getUserbyKakaoId(user.userId);
