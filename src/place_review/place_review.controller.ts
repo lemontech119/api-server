@@ -82,7 +82,7 @@ export class PlaceReviewController {
     @Body() createPlaceReviewDto: CreatePlaceReviewDto,
     @GetUser() kakaoUser: User,
     @TransactionManager() queryRunnerManager: EntityManager,
-  ): Promise<PlaceReview> {
+  ): Promise<boolean> {
     const place = await this.checkPlace(createPlaceReviewDto.placeId);
     const user = await this.authService.getUserbyKakaoId(kakaoUser.userId);
 
@@ -101,11 +101,7 @@ export class PlaceReviewController {
         queryRunnerManager,
       );
     }
-
-    return await this.placeReviewService.findByIndWithTransaction(
-      newPlaceReview.id,
-      queryRunnerManager,
-    );
+    return true;
   }
 
   async checkPlace(placeId: string): Promise<Place[]> {
