@@ -12,6 +12,7 @@ import { AddPlace } from './dto/addPlace.dto';
 import { Place } from './Entity/place.entity';
 import { PlaceInfo } from './Entity/placeInfo.entity';
 import { GetAllPlace } from './types/getAllPlace.type';
+import { PlaceMiddleware } from './middlewares/place.mid';
 
 @ApiTags('Place Api')
 @Controller('place')
@@ -19,6 +20,7 @@ export class PlaceController {
   constructor(
     private readonly placeService: PlaceService,
     private readonly placeInfoService: PlaceInfoService,
+    private readonly placeMiddleware: PlaceMiddleware,
   ) {}
 
   @Get('/exists/:kakaoId')
@@ -34,6 +36,7 @@ export class PlaceController {
   @ApiResponse({
     description: '장소 저장 여부',
     type: Boolean,
+    status: 200,
   })
   async isExsitsKakaoPlace(@Param('kakaoId') kakaoId) {
     const isExists = await this.placeService.isExistsByKakaoId(kakaoId);
@@ -43,6 +46,10 @@ export class PlaceController {
 
   @Post('/')
   @ApiOperation({ summary: 'Create', description: 'create place data' })
+  @ApiResponse({
+    status: 400,
+    description: '이미 등록된 장소입니다.',
+  })
   @ApiCreatedResponse({
     description: 'place',
     type: Place,
