@@ -4,12 +4,14 @@ import {
   ApiOperation,
   ApiTags,
   ApiParam,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { PlaceService } from './place.service';
 import { PlaceInfoService } from './placeInfo.service';
 import { AddPlace } from './dto/addPlace.dto';
 import { Place } from './Entity/place.entity';
 import { PlaceInfo } from './Entity/placeInfo.entity';
+import { GetAllPlace } from './types/getAllPlace.type';
 
 @ApiTags('Place Api')
 @Controller('place')
@@ -29,7 +31,7 @@ export class PlaceController {
     required: true,
     description: '카카오 장소 id',
   })
-  @ApiCreatedResponse({
+  @ApiResponse({
     description: '장소 저장 여부',
     type: Boolean,
   })
@@ -58,7 +60,7 @@ export class PlaceController {
     required: true,
     description: 'placeInfo id',
   })
-  @ApiCreatedResponse({
+  @ApiResponse({
     description: 'placeInfo',
     type: PlaceInfo,
   })
@@ -66,5 +68,18 @@ export class PlaceController {
     const placeInfo = await this.placeInfoService.getPlaceInfoById(id);
 
     return placeInfo;
+  }
+
+  @Get('/all')
+  @ApiOperation({ summary: 'GetPlaces', description: '모든 장소 목록 조회' })
+  @ApiResponse({
+    description: 'get all place',
+    type: GetAllPlace,
+    isArray: true,
+  })
+  async getAllPlace() {
+    const places = await this.placeService.findAll();
+
+    return places;
   }
 }

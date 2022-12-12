@@ -76,14 +76,14 @@ export class Place {
     example: '127.035423195622',
     description: '경도',
   })
-  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 11, scale: 8, default: 0 })
   x: number;
 
   @ApiProperty({
     example: '37.5266092359544',
     description: '위도',
   })
-  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 11, scale: 8, default: 0 })
   y: number;
 
   @ApiProperty({
