@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Place } from './Entity/place.entity';
 import { PlaceInfo } from './Entity/placeInfo.entity';
 import { PlaceController } from './place.controller';
 import { PlaceService } from './place.service';
 import { PlaceInfoService } from './placeInfo.service';
+import { PlaceMiddleware } from './middlewares/place.mid';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
@@ -14,6 +15,12 @@ import { JwtModule } from '@nestjs/jwt';
   ],
   exports: [PlaceService, PlaceInfoService],
   controllers: [PlaceController],
-  providers: [PlaceService, PlaceInfoService],
+  providers: [PlaceService, PlaceInfoService, PlaceMiddleware],
 })
-export class PlaceModule {}
+export class PlaceModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(PlaceMiddleware)
+      .forRoutes({ path: '/place', method: RequestMethod.POST });
+  }
+}
