@@ -2,9 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { winstonLogger } from './utils/logger';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new Logger();
+  const app = await NestFactory.create(AppModule, {
+    logger: winstonLogger,
+  });
   app.use(cookieParser());
   const config = new DocumentBuilder()
     .setTitle('Bside 13th Team 2')
@@ -25,7 +30,8 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
-
-  await app.listen(3000);
+  const port = process.env.PORT || 8000;
+  await app.listen(port);
+  logger.log(`${process.env.NODE_ENV} App Listening at localhost:${port}`);
 }
 bootstrap();
