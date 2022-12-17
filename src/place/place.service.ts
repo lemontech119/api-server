@@ -57,6 +57,9 @@ export class PlaceService {
 
   async findAll(): Promise<Place[]> {
     const ret = await this.placeRepository.find({
+      where: {
+        place_review: true,
+      },
       select: ['id', 'x', 'y', 'name'],
     });
 
