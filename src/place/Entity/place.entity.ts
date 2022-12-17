@@ -45,7 +45,7 @@ export class Place {
   @JoinColumn()
   place_Info: PlaceInfo;
 
-  @OneToOne(() => WantPlace, (wantPlace) => wantPlace.place, {
+  @OneToMany(() => WantPlace, (wantPlace) => wantPlace.place, {
     eager: false,
   })
   @JoinColumn()

@@ -95,7 +95,6 @@ export class WantPlaceController {
   async deleteWantPlace(
     @Body() deleteWantPlaceDto: DeleteWantPlaceDto,
   ): Promise<DeleteResult> {
-    console.log(deleteWantPlaceDto);
     return this.wantPlaceService.deleteWantPlace(deleteWantPlaceDto.id);
   }
 }
