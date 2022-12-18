@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -33,7 +32,7 @@ export class WantPlace {
     required: false,
     type: () => Place,
   })
-  @OneToOne(() => Place, (place) => place.want_place, { eager: false })
+  @ManyToOne(() => Place, (place) => place.want_place, { eager: false })
   place: Place;
 
   @ApiProperty({

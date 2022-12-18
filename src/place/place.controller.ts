@@ -12,7 +12,6 @@ import { AddPlace } from './dto/addPlace.dto';
 import { Place } from './Entity/place.entity';
 import { PlaceInfo } from './Entity/placeInfo.entity';
 import { GetAllPlace } from './types/getAllPlace.type';
-import { PlaceMiddleware } from './middlewares/place.mid';
 
 @ApiTags('Place Api')
 @Controller('place')
@@ -20,7 +19,6 @@ export class PlaceController {
   constructor(
     private readonly placeService: PlaceService,
     private readonly placeInfoService: PlaceInfoService,
-    private readonly placeMiddleware: PlaceMiddleware,
   ) {}
 
   @Get('/exists/:kakaoId')
@@ -77,8 +75,11 @@ export class PlaceController {
     return placeInfo;
   }
 
-  @Get('/all')
-  @ApiOperation({ summary: 'GetPlaces', description: '모든 장소 목록 조회' })
+  @Get('/reviewed')
+  @ApiOperation({
+    summary: 'GetPlaces',
+    description: '리뷰가 작성된 장소 목록 조회',
+  })
   @ApiResponse({
     description: 'get all place',
     type: GetAllPlace,
