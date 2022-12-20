@@ -14,7 +14,6 @@ import { User } from './../auth/Entity/user.entity';
 import { AuthGuard } from './../auth/security/jwt.Guard';
 import { PlaceService } from './../place/place.service';
 import { Place } from './../place/Entity/place.entity';
-import { AuthService } from 'src/auth/auth.service';
 import { PlaceMoodService } from './../place_mood/place_mood.service';
 import { TransactionInterceptor } from './../utils/transactionInterceptor';
 import {
@@ -36,7 +35,6 @@ export class PlaceReviewController {
     private readonly placeReviewService: PlaceReviewService,
     private readonly placeService: PlaceService,
     private readonly placeMoodService: PlaceMoodService,
-    private readonly authService: AuthService,
   ) {}
   @ApiOperation({ summary: 'findAll Review', description: 'Get Place Reviews' })
   @ApiParam({ name: 'placeId', description: 'UUID', type: String })
@@ -80,16 +78,15 @@ export class PlaceReviewController {
   @UseInterceptors(TransactionInterceptor)
   async createReview(
     @Body() createPlaceReviewDto: CreatePlaceReviewDto,
-    @GetUser() kakaoUser: User,
+    @GetUser() user: User,
     @TransactionManager() queryRunnerManager: EntityManager,
   ): Promise<boolean> {
     const place = await this.checkPlace(createPlaceReviewDto.placeId);
-    const user = await this.authService.getUserbyKakaoId(kakaoUser.userId);
 
     const newPlaceReview = await this.placeReviewService.createReview(
       createPlaceReviewDto,
       place[0],
-      user[0],
+      user,
       queryRunnerManager,
     );
 

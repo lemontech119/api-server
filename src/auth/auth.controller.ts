@@ -23,6 +23,8 @@ import { GetUserDto } from './dto/getUser.dto';
 import { LoginRequest } from './dto/loginRequest.dto';
 import { AuthGuard } from './security/jwt.Guard';
 import { JwtRefreshGuard } from './security/jwtRefresh.Guard';
+import { User } from 'src/auth/Entity/user.entity';
+import { GetUserDecorator } from './../decorator/get-user.decorator';
 
 @ApiTags('auth Api')
 @Controller('auth')
@@ -65,7 +67,7 @@ export class AuthController {
   @ApiHeader({ name: 'Authorization', description: 'auth token' })
   @UseGuards(AuthGuard)
   async logout(
-    @GetUser() getUserDto: GetUserDto,
+    @GetUserDecorator() getUserDto: GetUserDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     await this.authService.removeRefreshToken(getUserDto);
@@ -89,7 +91,7 @@ export class AuthController {
   async refresh(
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request,
-    @GetUser() getUserDto: GetUserDto,
+    @GetUserDecorator() getUserDto: GetUserDto,
   ) {
     const refreshToken: string = req.cookies?.Refresh;
     const { result } = await this.authService.getUserRefreshTokenMatches(

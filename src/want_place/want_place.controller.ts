@@ -12,7 +12,6 @@ import { WantPlaceService } from './want_place.service';
 import { User } from 'src/auth/Entity/user.entity';
 import { WantPlace } from 'src/want_place/Entity/want_place.entity';
 import { PlaceService } from './../place/place.service';
-import { AuthService } from 'src/auth/auth.service';
 import { AuthGuard } from 'src/auth/security/jwt.Guard';
 import { CreateWantPlaceDto } from './dto/create.wantPlace.dto';
 import { DeleteWantPlaceDto } from './dto/delete.wantPlace.dto';
@@ -25,7 +24,6 @@ export class WantPlaceController {
   constructor(
     private readonly wantPlaceService: WantPlaceService,
     private readonly placeService: PlaceService,
-    private readonly authService: AuthService,
   ) {}
 
   @ApiOperation({
@@ -42,9 +40,7 @@ export class WantPlaceController {
   @Get('/my/list')
   @UseGuards(AuthGuard)
   async findByUser(@GetUser() user: User) {
-    const userInfo = await this.authService.getUserbyKakaoId(user.userId);
-
-    return this.wantPlaceService.findByUser(userInfo[0]);
+    return this.wantPlaceService.findByUser(user);
   }
 
   @ApiOperation({ summary: 'createWantPlace', description: 'createWantPlace' })
@@ -66,16 +62,15 @@ export class WantPlaceController {
     @GetUser() user: User,
   ): Promise<WantPlace> {
     const place = await this.placeService.findById(createWantPlaceDto.placeId);
-    const userInfo = await this.authService.getUserbyKakaoId(user.userId);
     const checkWantPlace = await this.wantPlaceService.checkWantPlace(
       place[0].id,
-      userInfo[0].id,
+      user.id,
     );
     //이미 저장한 경우 저장 불가
     if (!checkWantPlace)
       throw new ConflictException('Already have a this Place');
 
-    return this.wantPlaceService.createWantPlace(place[0], userInfo[0]);
+    return this.wantPlaceService.createWantPlace(place[0], user);
   }
 
   @ApiOperation({ summary: 'deleteWantPlace', description: 'deleteWantPlace' })
