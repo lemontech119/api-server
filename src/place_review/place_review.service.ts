@@ -18,7 +18,7 @@ export class PlaceReviewService {
       select: { user: { nickname: true } },
       relations: {
         user: true,
-        place_mood: true,
+        review_mood: true,
       },
       where: {
         place: {
@@ -67,7 +67,7 @@ export class PlaceReviewService {
     return await this.placeReviewRepository.findOne({
       relations: {
         place: true,
-        place_mood: true,
+        review_mood: true,
       },
       where: {
         id,
@@ -80,7 +80,7 @@ export class PlaceReviewService {
     transactionManager: EntityManager,
   ): Promise<PlaceReview> {
     return await transactionManager.findOne(PlaceReview, {
-      relations: { place_mood: true },
+      relations: { review_mood: true },
       where: { id },
     });
   }

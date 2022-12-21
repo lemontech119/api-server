@@ -14,7 +14,7 @@ import { User } from './../auth/Entity/user.entity';
 import { AuthGuard } from './../auth/security/jwt.Guard';
 import { PlaceService } from './../place/place.service';
 import { Place } from './../place/Entity/place.entity';
-import { PlaceMoodService } from './../place_mood/place_mood.service';
+import { ReviewMoodService } from '../review_mood/review_mood.service';
 import { TransactionInterceptor } from './../utils/transactionInterceptor';
 import {
   ApiBody,
@@ -34,7 +34,7 @@ export class PlaceReviewController {
   constructor(
     private readonly placeReviewService: PlaceReviewService,
     private readonly placeService: PlaceService,
-    private readonly placeMoodService: PlaceMoodService,
+    private readonly reviewMoodService: ReviewMoodService,
   ) {}
   @ApiOperation({ summary: 'findAll Review', description: 'Get Place Reviews' })
   @ApiParam({ name: 'placeId', description: 'UUID', type: String })
@@ -91,7 +91,7 @@ export class PlaceReviewController {
     );
 
     for (const mood of createPlaceReviewDto.placeMood) {
-      await this.placeMoodService.createPlaceMood(
+      await this.reviewMoodService.createPlaceMood(
         newPlaceReview,
         place[0],
         mood,

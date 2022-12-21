@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/auth/Entity/user.entity';
 import { Place } from 'src/place/Entity/place.entity';
-import { PlaceMood } from 'src/place_mood/Entity/place_mood.entity';
+import { ReviewMood } from 'src/review_mood/Entity/review_mood.entity';
 import {
   Column,
   CreateDateColumn,
@@ -33,14 +33,14 @@ export class PlaceReview {
 
   @ApiProperty({
     required: false,
-    type: () => PlaceMood,
+    type: () => ReviewMood,
     isArray: true,
   })
-  @OneToMany(() => PlaceMood, (placeMood) => placeMood.place_review, {
+  @OneToMany(() => ReviewMood, (reviewMood) => reviewMood.place_review, {
     cascade: true,
     eager: false,
   })
-  place_mood: PlaceMood[];
+  review_mood: ReviewMood[];
 
   @ApiProperty({
     required: false,

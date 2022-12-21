@@ -5,13 +5,13 @@ import { PlaceReviewController } from './place_review.controller';
 import { PlaceReviewService } from './place_review.service';
 import { PlaceModule } from './../place/place.module';
 import { AuthModule } from './../auth/auth.module';
-import { PlaceMoodModule } from '../place_mood/place_mood.module';
+import { ReviewMoodModule } from '../review_mood/review_mood.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([PlaceReview]),
     PlaceModule,
     AuthModule,
-    PlaceMoodModule,
+    ReviewMoodModule,
   ],
   exports: [PlaceReviewService],
   controllers: [PlaceReviewController],

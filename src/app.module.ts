@@ -9,8 +9,9 @@ import { AuthModule } from 'src/auth/auth.module';
 import { PlaceModule } from './place/place.module';
 import { PlaceReviewModule } from './place_review/place_review.module';
 import { WantPlaceModule } from './want_place/want_place.module';
-import { PlaceMoodModule } from './place_mood/place_mood.module';
+import { ReviewMoodModule } from './review_mood/review_mood.module';
 import { LoggerMiddleware } from './utils/logger.middleware';
+import { PlaceMoodModule } from './place_mood/place_mood.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { LoggerMiddleware } from './utils/logger.middleware';
     PlaceReviewModule,
     WantPlaceModule,
     PlaceMoodModule,
+    ReviewMoodModule,
   ],
   controllers: [AppController],
   providers: [AppService, Logger],

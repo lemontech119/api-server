@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PlaceMood } from 'src/place_mood/Entity/place_mood.entity';
 import { PlaceReview } from 'src/place_review/Entity/place_review.entity';
 import { WantPlace } from 'src/want_place/Entity/want_place.entity';
 import {
@@ -13,6 +12,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { PlaceInfo } from './placeInfo.entity';
+import { PlaceMood } from 'src/place_mood/Entity/place_mood.entity';
+import { ReviewMood } from 'src/review_mood/Entity/review_mood.entity';
 
 @Entity()
 export class Place {
@@ -34,6 +35,9 @@ export class Place {
     cascade: true,
   })
   place_mood: PlaceMood[];
+
+  @OneToMany(() => ReviewMood, (reviewMood) => reviewMood.place)
+  reveiw_mood: ReviewMood[];
 
   @ApiProperty({
     description: '장소 상세정보',
