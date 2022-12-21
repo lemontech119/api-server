@@ -1,16 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Place } from 'src/place/Entity/place.entity';
 import {
+  ReviewLightingEnum,
+  ReviewMoodEnum,
+  ReviewPraisedEnum,
+} from 'src/review_mood/review_mood.enum';
+import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
+  OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class PlaceMood {
+export class PlaceStats {
   @ApiProperty({
     required: false,
     type: String,
@@ -22,24 +27,46 @@ export class PlaceMood {
     type: () => Place,
     required: false,
   })
-  @ManyToOne(() => Place, (place) => place.place_mood, {
-    onDelete: 'CASCADE',
+  @OneToOne(() => Place, (place) => place.place_mood, {
     eager: false,
+    cascade: ['insert'],
   })
   place: Place;
 
   @ApiProperty({
-    required: false,
-    type: String,
+    example: '0',
+    description: '리뷰 수',
   })
-  mood_category: string;
+  @Column({ name: 'review_cnt', default: 0 })
+  reviewCnt: number;
+
+  @ApiProperty({
+    example: '0',
+    description: '리뷰평점',
+  })
+  @Column({ name: 'rating_avrg', default: 0, type: 'float' })
+  ratingAvrg: number;
 
   @ApiProperty({
     required: false,
     type: String,
   })
   @Column()
-  mood: string;
+  mood: ReviewMoodEnum;
+
+  @ApiProperty({
+    required: false,
+    type: String,
+  })
+  @Column()
+  light: ReviewLightingEnum;
+
+  @ApiProperty({
+    required: false,
+    type: String,
+  })
+  @Column()
+  praised: ReviewPraisedEnum;
 
   @ApiProperty({
     required: false,

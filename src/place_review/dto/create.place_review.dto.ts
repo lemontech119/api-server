@@ -1,6 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator';
-import { ReveiwMoodDto } from '../../review_mood/dto/review_mood.dto';
+import {
+  MoodEnum,
+  ReviewCategoryMoodEnum,
+} from 'src/review_mood/review_mood.enum';
+import { ReviewMoodDto } from '../../review_mood/dto/review_mood.dto';
 
 export class CreatePlaceReviewDto {
   @ApiProperty({
@@ -74,10 +78,21 @@ export class CreatePlaceReviewDto {
   is_rent: boolean;
 
   @ApiProperty({
+    description: 'simple_Review ',
+    type: String,
+  })
+  @IsBoolean()
+  simple_review: string;
+
+  @ApiProperty({
     description: 'ReivewMood',
-    type: ReveiwMoodDto,
+    type: ReviewMoodDto,
+    example: {
+      mood_category: ReviewCategoryMoodEnum.Mood,
+      mood: MoodEnum.Light,
+    },
     isArray: true,
   })
   @IsArray()
-  reveiwMoodDto: ReveiwMoodDto[];
+  reveiwMoodDto: ReviewMoodDto[];
 }

@@ -45,6 +45,7 @@ export class PlaceReviewService {
       is_parking,
       is_advance_payment,
       is_rent,
+      simple_review,
     } = createPlaceReviewDto;
 
     const newReview = new PlaceReview();
@@ -60,12 +61,15 @@ export class PlaceReviewService {
     newReview.is_parking = is_parking;
     newReview.is_advance_payment = is_advance_payment;
     newReview.is_rent = is_rent;
+    newReview.simple_review = simple_review;
     newReview.user = user;
     try {
       const result = await queryRunnerManager.save(newReview);
       return result;
     } catch (err) {
-      throw new ConflictException('Create PlaceReview Failed to Transaction');
+      throw new ConflictException(
+        `${err}. Create PlaceReview Failed to Transaction`,
+      );
     }
   }
 

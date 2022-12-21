@@ -12,7 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { PlaceInfo } from './placeInfo.entity';
-import { PlaceMood } from 'src/place_mood/Entity/place_mood.entity';
+import { PlaceStats } from 'src/place_stats/Entity/place_stats.entity';
 import { ReviewMood } from 'src/review_mood/Entity/review_mood.entity';
 
 @Entity()
@@ -30,11 +30,12 @@ export class Place {
   })
   place_review: PlaceReview[];
 
-  @OneToMany(() => PlaceMood, (placeMood) => placeMood.place, {
+  @JoinColumn()
+  @OneToOne(() => PlaceStats, (placeStats) => placeStats.place, {
     eager: false,
-    cascade: true,
+    cascade: ['insert'],
   })
-  place_mood: PlaceMood[];
+  place_mood: PlaceStats;
 
   @OneToMany(() => ReviewMood, (reviewMood) => reviewMood.place)
   reveiw_mood: ReviewMood[];
@@ -89,20 +90,6 @@ export class Place {
   })
   @Column({ type: 'decimal', precision: 11, scale: 8, default: 0 })
   y: number;
-
-  @ApiProperty({
-    example: '0',
-    description: '리뷰 수',
-  })
-  @Column({ name: 'review_cnt', default: 0 })
-  reviewCnt: number;
-
-  @ApiProperty({
-    example: '0',
-    description: '리뷰평점',
-  })
-  @Column({ name: 'rating_avrg', default: 0, type: 'float' })
-  ratingAvrg: number;
 
   @CreateDateColumn({
     type: 'timestamp',
