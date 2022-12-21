@@ -82,7 +82,7 @@ export class PlaceReviewController {
     @TransactionManager() queryRunnerManager: EntityManager,
   ): Promise<boolean> {
     const place = await this.checkPlace(createPlaceReviewDto.placeId);
-
+    console.log(place, user, createPlaceReviewDto);
     const newPlaceReview = await this.placeReviewService.createReview(
       createPlaceReviewDto,
       place[0],
@@ -90,11 +90,11 @@ export class PlaceReviewController {
       queryRunnerManager,
     );
 
-    for (const mood of createPlaceReviewDto.placeMood) {
+    for (const reviewMood of createPlaceReviewDto.reveiwMoodDto) {
       await this.reviewMoodService.createPlaceMood(
         newPlaceReview,
         place[0],
-        mood,
+        reviewMood,
         queryRunnerManager,
       );
     }

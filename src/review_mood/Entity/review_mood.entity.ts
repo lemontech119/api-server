@@ -10,6 +10,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { MoodEnum, ReviewCategoryMoodEnum } from '../review_mood.enum';
 
 @Entity()
 export class ReviewMood {
@@ -44,14 +45,15 @@ export class ReviewMood {
     required: false,
     type: String,
   })
-  mood_category: string;
+  @Column()
+  mood_category: ReviewCategoryMoodEnum;
 
   @ApiProperty({
     required: false,
     type: String,
   })
   @Column()
-  mood: string;
+  mood: MoodEnum;
 
   @ApiProperty({
     required: false,

@@ -96,6 +96,27 @@ export class PlaceReview {
 
   @ApiProperty({
     required: false,
+    type: Boolean,
+  })
+  @Column()
+  is_parking: boolean;
+
+  @ApiProperty({
+    required: false,
+    type: Boolean,
+  })
+  @Column()
+  is_advance_payment: boolean;
+
+  @ApiProperty({
+    required: false,
+    type: Boolean,
+  })
+  @Column()
+  is_rent: boolean;
+
+  @ApiProperty({
+    required: false,
     type: Date,
   })
   @CreateDateColumn({

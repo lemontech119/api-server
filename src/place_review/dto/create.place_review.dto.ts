@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator';
+import { ReveiwMoodDto } from '../../review_mood/dto/review_mood.dto';
 
 export class CreatePlaceReviewDto {
   @ApiProperty({
@@ -43,6 +44,7 @@ export class CreatePlaceReviewDto {
   })
   @IsBoolean()
   is_room: boolean;
+
   @ApiProperty({
     description: 'is_reservation',
     type: Boolean,
@@ -51,10 +53,31 @@ export class CreatePlaceReviewDto {
   is_reservation: boolean;
 
   @ApiProperty({
-    description: 'placeMood',
-    type: String,
+    description: 'is_parking',
+    type: Boolean,
+  })
+  @IsBoolean()
+  is_parking: boolean;
+
+  @ApiProperty({
+    description: 'is_advance_payment',
+    type: Boolean,
+  })
+  @IsBoolean()
+  is_advance_payment: boolean;
+
+  @ApiProperty({
+    description: 'is_rent',
+    type: Boolean,
+  })
+  @IsBoolean()
+  is_rent: boolean;
+
+  @ApiProperty({
+    description: 'ReivewMood',
+    type: ReveiwMoodDto,
     isArray: true,
   })
   @IsArray()
-  placeMood: string[];
+  reveiwMoodDto: ReveiwMoodDto[];
 }
