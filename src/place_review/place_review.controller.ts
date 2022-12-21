@@ -27,6 +27,7 @@ import {
 import { TransactionManager } from 'src/decorator/transaction.decorator';
 import { EntityManager } from 'typeorm';
 import { PlaceReview } from './Entity/place_review.entity';
+import { PlaceStatsService } from 'src/place_stats/place_stats.service';
 
 @ApiTags('Place-review Api')
 @Controller('place-review')
@@ -35,6 +36,7 @@ export class PlaceReviewController {
     private readonly placeReviewService: PlaceReviewService,
     private readonly placeService: PlaceService,
     private readonly reviewMoodService: ReviewMoodService,
+    private readonly placeStatsService: PlaceStatsService,
   ) {}
   @ApiOperation({ summary: 'findAll Review', description: 'Get Place Reviews' })
   @ApiParam({ name: 'placeId', description: 'UUID', type: String })
@@ -82,7 +84,7 @@ export class PlaceReviewController {
     @TransactionManager() queryRunnerManager: EntityManager,
   ): Promise<boolean> {
     const place = await this.checkPlace(createPlaceReviewDto.placeId);
-    console.log(place, user, createPlaceReviewDto);
+
     const newPlaceReview = await this.placeReviewService.createReview(
       createPlaceReviewDto,
       place[0],
@@ -98,6 +100,13 @@ export class PlaceReviewController {
         queryRunnerManager,
       );
     }
+
+    await this.reviewMoodService.findMostValue(
+      newPlaceReview.id,
+      place[0].id,
+      queryRunnerManager,
+    );
+
     return true;
   }
 

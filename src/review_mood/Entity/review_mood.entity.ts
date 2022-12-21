@@ -6,7 +6,6 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -35,7 +34,7 @@ export class ReviewMood {
     type: () => PlaceReview,
     required: false,
   })
-  @OneToMany(() => PlaceReview, (placeReview) => placeReview.review_mood, {
+  @ManyToOne(() => PlaceReview, (placeReview) => placeReview.review_mood, {
     onDelete: 'CASCADE',
     eager: false,
   })
@@ -43,14 +42,16 @@ export class ReviewMood {
 
   @ApiProperty({
     required: false,
-    type: String,
+    enum: ReviewCategoryMoodEnum,
+    isArray: true,
   })
   @Column()
   mood_category: ReviewCategoryMoodEnum;
 
   @ApiProperty({
     required: false,
-    type: String,
+    enum: MoodEnum,
+    isArray: true,
   })
   @Column()
   mood: MoodEnum;

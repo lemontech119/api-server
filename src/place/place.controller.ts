@@ -69,7 +69,7 @@ export class PlaceController {
     description: 'placeInfo',
     type: PlaceInfo,
   })
-  async getPlaceInfoById(@Param('id') id) {
+  async getPlaceInfoById(@Param('id') id: string) {
     const placeInfo = await this.placeInfoService.getPlaceInfoById(id);
 
     return placeInfo;

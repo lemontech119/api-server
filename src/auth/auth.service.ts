@@ -118,7 +118,7 @@ export class AuthService {
     const payload = { userId, nickname };
     const accessToken = await this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET || 'test',
-      expiresIn: process.env.AUTH_EXPPIRESIN || '10m',
+      expiresIn: process.env.AUTH_EXPPIRESIN || '1d',
     });
     return {
       accessToken,

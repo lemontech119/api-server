@@ -117,6 +117,13 @@ export class PlaceReview {
 
   @ApiProperty({
     required: false,
+    type: String,
+  })
+  @Column()
+  simple_review: string; // 한줄평
+
+  @ApiProperty({
+    required: false,
     type: Date,
   })
   @CreateDateColumn({
