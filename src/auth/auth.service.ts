@@ -81,10 +81,11 @@ export class AuthService {
   }
 
   async createKakaoUser(kakaoAuth: KakaoAuth): Promise<User> {
+    const nickname = await this.randomNickName();
     const data = this.userRepository.create({
       id: generateUuid(),
       userId: kakaoAuth.id,
-      nickname: this.createDefaultNickname(),
+      nickname: nickname,
       vendor: authConst.VENDOR.KAKAO,
       email: kakaoAuth.kakao_account.email,
       image: kakaoAuth.kakao_account.profile.profile_image_url,
@@ -92,6 +93,19 @@ export class AuthService {
       ageRange: kakaoAuth.kakao_account.age_range,
     });
     return await this.userRepository.save(data);
+  }
+
+  async randomNickName(): Promise<string> {
+    let nickname;
+    const url = 'https://nickname.hwanmoo.kr/?format=json&count=1&max_length=8';
+    try {
+      const nicknameData = await this.httpService.axiosRef.get(url);
+      nickname = nicknameData.data.words[0];
+    } catch (e) {
+      return this.createDefaultNickname();
+    }
+
+    return nickname ? nickname : this.createDefaultNickname();
   }
 
   createDefaultNickname(): string {
