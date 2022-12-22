@@ -1,4 +1,8 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager } from 'typeorm';
 import { CreatePlaceReviewDto } from './dto/create.place_review.dto';
@@ -6,6 +10,7 @@ import { PlaceReview } from './Entity/place_review.entity';
 import { Place } from './../place/Entity/place.entity';
 import { User } from 'src/auth/Entity/user.entity';
 import { generateUuid } from './../utils/gnerator';
+import { CntAndScoreDto } from './dto/cntAndScore.dto';
 @Injectable()
 export class PlaceReviewService {
   constructor(
@@ -69,6 +74,28 @@ export class PlaceReviewService {
     } catch (err) {
       throw new ConflictException(
         `${err}. Create PlaceReview Failed to Transaction`,
+      );
+    }
+  }
+
+  async calCntAndScore(
+    placeId: string,
+    queryRunnerManager: EntityManager,
+  ): Promise<CntAndScoreDto> {
+    try {
+      const cntAndScore: CntAndScoreDto = await queryRunnerManager
+        .createQueryBuilder(PlaceReview, 'placeReview')
+        .select('COUNT(placeReview.rating) as cnt')
+        .addSelect('ROUND(AVG(placeReview.rating)) as score')
+        .leftJoin('placeReview.place', 'place')
+        .groupBy('place.id')
+        .having('place.id = :placeId', { placeId })
+        .getRawOne();
+
+      return cntAndScore;
+    } catch (err) {
+      throw new NotFoundException(
+        `${err}. Select Cnt And Score Failed to Transaction`,
       );
     }
   }

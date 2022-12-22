@@ -30,12 +30,11 @@ export class Place {
   })
   place_review: PlaceReview[];
 
-  @JoinColumn()
   @OneToOne(() => PlaceStats, (placeStats) => placeStats.place, {
     eager: false,
     cascade: ['insert'],
   })
-  place_mood: PlaceStats;
+  place_stats: PlaceStats;
 
   @OneToMany(() => ReviewMood, (reviewMood) => reviewMood.place)
   reveiw_mood: ReviewMood[];

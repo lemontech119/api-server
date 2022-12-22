@@ -76,8 +76,8 @@ export class PlaceReviewController {
     type: PlaceReview,
   })
   @UseGuards(AuthGuard)
-  @Post()
   @UseInterceptors(TransactionInterceptor)
+  @Post()
   async createReview(
     @Body() createPlaceReviewDto: CreatePlaceReviewDto,
     @GetUser() user: User,
@@ -101,9 +101,20 @@ export class PlaceReviewController {
       );
     }
 
-    await this.reviewMoodService.findMostValue(
-      newPlaceReview.id,
+    const mostReviewValue = await this.reviewMoodService.findMostValue(
       place[0].id,
+      queryRunnerManager,
+    );
+
+    const reviewCntAndScore = await this.placeReviewService.calCntAndScore(
+      place[0].id,
+      queryRunnerManager,
+    );
+
+    await this.placeStatsService.updateStats(
+      place[0],
+      mostReviewValue,
+      reviewCntAndScore,
       queryRunnerManager,
     );
 

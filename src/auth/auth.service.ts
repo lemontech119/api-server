@@ -96,7 +96,7 @@ export class AuthService {
   }
 
   async randomNickName(): Promise<string> {
-    let nickname;
+    let nickname: string;
     const url = 'https://nickname.hwanmoo.kr/?format=json&count=1&max_length=8';
     try {
       const nicknameData = await this.httpService.axiosRef.get(url);
