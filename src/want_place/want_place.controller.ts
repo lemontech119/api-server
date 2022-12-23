@@ -63,14 +63,14 @@ export class WantPlaceController {
   ): Promise<WantPlace> {
     const place = await this.placeService.findById(createWantPlaceDto.placeId);
     const checkWantPlace = await this.wantPlaceService.checkWantPlace(
-      place[0].id,
+      place.id,
       user.id,
     );
     //이미 저장한 경우 저장 불가
     if (!checkWantPlace)
       throw new ConflictException('Already have a this Place');
 
-    return this.wantPlaceService.createWantPlace(place[0], user);
+    return this.wantPlaceService.createWantPlace(place, user);
   }
 
   @ApiOperation({ summary: 'deleteWantPlace', description: 'deleteWantPlace' })

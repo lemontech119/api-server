@@ -15,22 +15,14 @@ export class PlaceStatsService {
   ) {}
 
   async updateStats(
+    placeStats: PlaceStats,
     place: Place,
     mostReviewValue: MostReviewValue[],
     reviewCntAndScore: CntAndScoreDto,
     queryRunnerManager: EntityManager,
   ): Promise<void> {
     try {
-      let placeStats = await queryRunnerManager.findOne(PlaceStats, {
-        relations: { place: true },
-        where: { place: { id: place.id } },
-      });
-
-      if (!placeStats) {
-        placeStats = new PlaceStats();
-        placeStats.id = generateUuid();
-      }
-
+      console.log(placeStats);
       placeStats.place = place;
       placeStats.ratingAvrg = reviewCntAndScore.score;
       placeStats.reviewCnt = reviewCntAndScore.cnt;
@@ -44,5 +36,24 @@ export class PlaceStatsService {
         `${err}. Create PlaceStats Failed to Transaction`,
       );
     }
+  }
+
+  async isExistsByPlaceId(placeId: string): Promise<PlaceStats> {
+    const placeStats = await this.placeStatsRepository.find({
+      relations: { place: true },
+      where: { place: { id: placeId } },
+    });
+
+    return placeStats[0];
+  }
+
+  async createStats(place: Place): Promise<PlaceStats> {
+    return await this.placeStatsRepository.save({
+      id: generateUuid(),
+      lighting: null,
+      praised: null,
+      mood: null,
+      place,
+    });
   }
 }

@@ -28,6 +28,7 @@ import { TransactionManager } from 'src/decorator/transaction.decorator';
 import { EntityManager } from 'typeorm';
 import { PlaceReview } from './Entity/place_review.entity';
 import { PlaceStatsService } from 'src/place_stats/place_stats.service';
+import { PlaceStats } from 'src/place_stats/Entity/place_stats.entity';
 
 @ApiTags('Place-review Api')
 @Controller('place-review')
@@ -85,9 +86,18 @@ export class PlaceReviewController {
   ): Promise<boolean> {
     const place = await this.checkPlace(createPlaceReviewDto.placeId);
 
+    let placeStats = await this.placeStatsService.isExistsByPlaceId(place.id);
+
+    if (!placeStats) {
+      placeStats = await this.placeStatsService.createStats(place);
+    }
+
+    /**
+     * Transaction Start
+     */
     const newPlaceReview = await this.placeReviewService.createReview(
       createPlaceReviewDto,
-      place[0],
+      place,
       user,
       queryRunnerManager,
     );
@@ -95,24 +105,25 @@ export class PlaceReviewController {
     for (const reviewMood of createPlaceReviewDto.reveiwMoodDto) {
       await this.reviewMoodService.createPlaceMood(
         newPlaceReview,
-        place[0],
+        place,
         reviewMood,
         queryRunnerManager,
       );
     }
 
     const mostReviewValue = await this.reviewMoodService.findMostValue(
-      place[0].id,
+      place.id,
       queryRunnerManager,
     );
 
     const reviewCntAndScore = await this.placeReviewService.calCntAndScore(
-      place[0].id,
+      place.id,
       queryRunnerManager,
     );
 
     await this.placeStatsService.updateStats(
-      place[0],
+      placeStats,
+      place,
       mostReviewValue,
       reviewCntAndScore,
       queryRunnerManager,
@@ -121,7 +132,8 @@ export class PlaceReviewController {
     return true;
   }
 
-  async checkPlace(placeId: string): Promise<Place[]> {
-    return await this.placeService.findById(placeId);
+  async checkPlace(placeId: string): Promise<Place> {
+    const result = await this.placeService.findById(placeId);
+    return result;
   }
 }
