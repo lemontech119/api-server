@@ -1,8 +1,7 @@
 import { Controller, Post, UseGuards, Body } from '@nestjs/common';
-import { PlaceMoodService } from './place_mood.service';
-import { AuthGuard } from './../auth/security/jwt.Guard';
-import { PlaceMood } from './Entity/place_mood.entity';
-import { PlaceReviewService } from 'src/place_review/place_review.service';
+import { ReviewMoodService } from './review_mood.service';
+import { AuthGuard } from '../auth/security/jwt.Guard';
+import { ReviewMood } from './Entity/review_mood.entity';
 import {
   ApiBody,
   ApiHeader,
@@ -13,8 +12,8 @@ import {
 
 @ApiTags('Place-mood Api')
 @Controller('place-mood')
-export class PlaceMoodController {
-  constructor(private readonly placeMoodService: PlaceMoodService) {} // private readonly placeReviewService: PlaceReviewService,
+export class ReviewMoodController {
+  constructor(private readonly reviewMoodService: ReviewMoodService) {} // private readonly placeReviewService: PlaceReviewService,
 
   // @ApiOperation({ summary: 'createMood', description: 'createMood' })
   // @ApiHeader({ name: 'Authorization', description: 'auth token' })

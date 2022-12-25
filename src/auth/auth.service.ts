@@ -96,7 +96,7 @@ export class AuthService {
   }
 
   async randomNickName(): Promise<string> {
-    let nickname;
+    let nickname: string;
     const url = 'https://nickname.hwanmoo.kr/?format=json&count=1&max_length=8';
     try {
       const nicknameData = await this.httpService.axiosRef.get(url);
@@ -118,7 +118,7 @@ export class AuthService {
     const payload = { userId, nickname };
     const accessToken = await this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET || 'test',
-      expiresIn: process.env.AUTH_EXPPIRESIN || '10m',
+      expiresIn: process.env.AUTH_EXPPIRESIN || '1d',
     });
     return {
       accessToken,

@@ -14,7 +14,7 @@ import { User } from './../auth/Entity/user.entity';
 import { AuthGuard } from './../auth/security/jwt.Guard';
 import { PlaceService } from './../place/place.service';
 import { Place } from './../place/Entity/place.entity';
-import { PlaceMoodService } from './../place_mood/place_mood.service';
+import { ReviewMoodService } from '../review_mood/review_mood.service';
 import { TransactionInterceptor } from './../utils/transactionInterceptor';
 import {
   ApiBody,
@@ -27,6 +27,8 @@ import {
 import { TransactionManager } from 'src/decorator/transaction.decorator';
 import { EntityManager } from 'typeorm';
 import { PlaceReview } from './Entity/place_review.entity';
+import { PlaceStatsService } from 'src/place_stats/place_stats.service';
+import { PlaceStats } from 'src/place_stats/Entity/place_stats.entity';
 
 @ApiTags('Place-review Api')
 @Controller('place-review')
@@ -34,7 +36,8 @@ export class PlaceReviewController {
   constructor(
     private readonly placeReviewService: PlaceReviewService,
     private readonly placeService: PlaceService,
-    private readonly placeMoodService: PlaceMoodService,
+    private readonly reviewMoodService: ReviewMoodService,
+    private readonly placeStatsService: PlaceStatsService,
   ) {}
   @ApiOperation({ summary: 'findAll Review', description: 'Get Place Reviews' })
   @ApiParam({ name: 'placeId', description: 'UUID', type: String })
@@ -74,8 +77,8 @@ export class PlaceReviewController {
     type: PlaceReview,
   })
   @UseGuards(AuthGuard)
-  @Post()
   @UseInterceptors(TransactionInterceptor)
+  @Post()
   async createReview(
     @Body() createPlaceReviewDto: CreatePlaceReviewDto,
     @GetUser() user: User,
@@ -83,25 +86,54 @@ export class PlaceReviewController {
   ): Promise<boolean> {
     const place = await this.checkPlace(createPlaceReviewDto.placeId);
 
+    let placeStats = await this.placeStatsService.isExistsByPlaceId(place.id);
+
+    if (!placeStats) {
+      placeStats = await this.placeStatsService.createStats(place);
+    }
+
+    /**
+     * Transaction Start
+     */
     const newPlaceReview = await this.placeReviewService.createReview(
       createPlaceReviewDto,
-      place[0],
+      place,
       user,
       queryRunnerManager,
     );
 
-    for (const mood of createPlaceReviewDto.placeMood) {
-      await this.placeMoodService.createPlaceMood(
+    for (const reviewMood of createPlaceReviewDto.reveiwMoodDto) {
+      await this.reviewMoodService.createPlaceMood(
         newPlaceReview,
-        place[0],
-        mood,
+        place,
+        reviewMood,
         queryRunnerManager,
       );
     }
+
+    const mostReviewValue = await this.reviewMoodService.findMostValue(
+      place.id,
+      queryRunnerManager,
+    );
+
+    const reviewCntAndScore = await this.placeReviewService.calCntAndScore(
+      place.id,
+      queryRunnerManager,
+    );
+
+    await this.placeStatsService.updateStats(
+      placeStats,
+      place,
+      mostReviewValue,
+      reviewCntAndScore,
+      queryRunnerManager,
+    );
+
     return true;
   }
 
-  async checkPlace(placeId: string): Promise<Place[]> {
-    return await this.placeService.findById(placeId);
+  async checkPlace(placeId: string): Promise<Place> {
+    const result = await this.placeService.findById(placeId);
+    return result;
   }
 }

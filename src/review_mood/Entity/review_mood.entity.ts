@@ -9,9 +9,10 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { MoodEnum, ReviewCategoryMoodEnum } from '../review_mood.enum';
 
 @Entity()
-export class PlaceMood {
+export class ReviewMood {
   @ApiProperty({
     required: false,
     type: String,
@@ -23,7 +24,7 @@ export class PlaceMood {
     type: () => Place,
     required: false,
   })
-  @ManyToOne(() => Place, (place) => place.place_mood, {
+  @ManyToOne(() => Place, (place) => place.reveiw_mood, {
     onDelete: 'CASCADE',
     eager: false,
   })
@@ -33,7 +34,7 @@ export class PlaceMood {
     type: () => PlaceReview,
     required: false,
   })
-  @ManyToOne(() => PlaceReview, (placeReview) => placeReview.place_mood, {
+  @ManyToOne(() => PlaceReview, (placeReview) => placeReview.review_mood, {
     onDelete: 'CASCADE',
     eager: false,
   })
@@ -41,10 +42,19 @@ export class PlaceMood {
 
   @ApiProperty({
     required: false,
-    type: String,
+    enum: ReviewCategoryMoodEnum,
+    isArray: true,
   })
   @Column()
-  mood: string;
+  mood_category: ReviewCategoryMoodEnum;
+
+  @ApiProperty({
+    required: false,
+    enum: MoodEnum,
+    isArray: true,
+  })
+  @Column()
+  mood: MoodEnum;
 
   @ApiProperty({
     required: false,
