@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Param,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ApiCreatedResponse,
   ApiOperation,
@@ -36,7 +44,7 @@ export class PlaceController {
     type: Boolean,
     status: 200,
   })
-  async isExsitsKakaoPlace(@Param('kakaoId') kakaoId) {
+  async isExsitsKakaoPlace(@Param('kakaoId') kakaoId: string) {
     const isExists = await this.placeService.isExistsByKakaoId(kakaoId);
 
     return isExists;
@@ -56,6 +64,18 @@ export class PlaceController {
     const place = await this.placeService.createPlace(addPlace);
 
     return place;
+  }
+
+  @Get('/:kakaoId')
+  async findByKakaoId(@Param('kakaoId') kakaoId: string) {
+    console.log(kakaoId);
+    const isExists = await this.placeService.isExistsByKakaoId(kakaoId);
+
+    if (!isExists) throw new NotFoundException('Can not find Place');
+
+    const place = await this.placeService.kakaoIdByPlace(kakaoId);
+
+    return await this.placeService.findByIdForSearch(place.id);
   }
 
   @Get('/info/:id')
