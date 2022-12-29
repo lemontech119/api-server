@@ -12,6 +12,7 @@ import { WantPlaceModule } from './want_place/want_place.module';
 import { ReviewMoodModule } from './review_mood/review_mood.module';
 import { LoggerMiddleware } from './utils/logger.middleware';
 import { PlaceStatsModule } from './place_stats/place.stats.module';
+import { ChartModule } from './chart/chart.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PlaceStatsModule } from './place_stats/place.stats.module';
     WantPlaceModule,
     ReviewMoodModule,
     PlaceStatsModule,
+    ChartModule,
   ],
   controllers: [AppController],
   providers: [AppService, Logger],
