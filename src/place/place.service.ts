@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Place } from './Entity/place.entity';
 import { PlaceInfo } from './Entity/placeInfo.entity';
 import { PlaceInfoService } from './placeInfo.service';
@@ -61,6 +61,19 @@ export class PlaceService {
         place_review: true,
       },
       select: ['id', 'x', 'y', 'name'],
+    });
+
+    return ret;
+  }
+
+  async findByIdList(idList: string[]): Promise<Place[]> {
+    const ret = await this.placeRepository.find({
+      where: {
+        id: In(idList),
+      },
+      relations: {
+        place_stats: true,
+      },
     });
 
     return ret;
