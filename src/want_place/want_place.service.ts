@@ -33,6 +33,16 @@ export class WantPlaceService {
     return wantPlace.length < 1;
   }
 
+  async getCountByPlaceId(placeId: string): Promise<number> {
+    const wantPlace = await this.wantPlaceRepository.count({
+      where: {
+        place: { id: placeId },
+      },
+    });
+
+    return wantPlace;
+  }
+
   async findByUser(userInfo: User): Promise<WantPlace[]> {
     return await this.wantPlaceRepository.find({
       relations: {
