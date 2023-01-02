@@ -86,12 +86,12 @@ export class PlaceReviewService {
       const cntAndScore: CntAndScoreDto = await queryRunnerManager
         .createQueryBuilder(PlaceReview, 'placeReview')
         .select('COUNT(placeReview.rating) as cnt')
-        .addSelect('ROUND(AVG(placeReview.rating)) as score')
+        .addSelect('ROUND(AVG(placeReview.rating),1) as score')
         .leftJoin('placeReview.place', 'place')
         .groupBy('place.id')
         .having('place.id = :placeId', { placeId })
         .getRawOne();
-
+      console.log(cntAndScore);
       return cntAndScore;
     } catch (err) {
       throw new NotFoundException(
