@@ -6,6 +6,7 @@ import {
   UseGuards,
   ConflictException,
   Delete,
+  Param,
 } from '@nestjs/common';
 import { GetUser } from 'src/decorator/get-user.decorator';
 import { WantPlaceService } from './want_place.service';
@@ -17,7 +18,13 @@ import { CreateWantPlaceDto } from './dto/create.wantPlace.dto';
 import { DeleteWantPlaceDto } from './dto/delete.wantPlace.dto';
 import { WantPlaceAndPlace } from './types/wantPlaceAndPlace.type';
 import { DeleteResult } from 'typeorm';
-import { ApiBody, ApiHeader, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiHeader,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @Controller('want-place')
 export class WantPlaceController {
@@ -41,6 +48,16 @@ export class WantPlaceController {
   @UseGuards(AuthGuard)
   async findByUser(@GetUser() user: User) {
     return this.wantPlaceService.findByUser(user);
+  }
+
+  @ApiOperation({
+    summary: 'getCountByPlaceId',
+    description: '장소 가고싶은 곳 등록 횟수',
+  })
+  @ApiParam({ name: 'placeId', description: '장소 ID', type: String })
+  @Get('/:placeId/count')
+  async getCountById(@Param('placeId') placeId: string): Promise<number> {
+    return this.wantPlaceService.getCountByPlaceId(placeId);
   }
 
   @ApiOperation({ summary: 'createWantPlace', description: 'createWantPlace' })

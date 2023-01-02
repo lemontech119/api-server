@@ -77,6 +77,7 @@ export class PlaceService {
       },
       relations: {
         place_stats: true,
+        place_Info: true,
       },
     });
 
