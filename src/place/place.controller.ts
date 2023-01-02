@@ -118,7 +118,7 @@ export class PlaceController {
     description: '장소 상세 정보',
   })
   @ApiParam({
-    name: 'kakaoId',
+    name: 'id',
     required: true,
     type: String,
   })
