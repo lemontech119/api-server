@@ -111,62 +111,6 @@ export class PlaceService {
   }
 
   async findPlaceDetail(id: string) {
-    const PriceAvg = this.placeRepository
-      .createQueryBuilder('place')
-      .leftJoin(PlaceReview, 'review', 'review.placeId = place.id')
-      .groupBy('review.price_range')
-      .addGroupBy('place.id')
-      .having('place.id = :id', { id })
-      .orderBy('COUNT(review.price_range)', 'DESC')
-      .limit(1)
-      .select('review.price_range')
-      .getQuery();
-
-    const WantPlaceCnt = this.placeRepository
-      .createQueryBuilder('place')
-      .leftJoin(WantPlace, 'want', 'want.placeId = place.id')
-      .groupBy('want.placeId')
-      .having('place.id = :id', { id })
-      .select('COUNT(want.placeId)')
-      .getQuery();
-
-    const MoodCnt = this.placeRepository
-      .createQueryBuilder('place')
-      .leftJoin(PlaceStats, 'stats', 'stats.placeId = place.id')
-      .leftJoin(ReviewMood, 'mood', 'mood.mood = stats.mood')
-      .groupBy('mood.mood')
-      .addGroupBy('place.id')
-      .having('place.id = :id', { id })
-      .select('COUNT(mood.mood)')
-      .getQuery();
-
-    const LightingCnt = this.placeRepository
-      .createQueryBuilder('place')
-      .leftJoin(PlaceStats, 'stats', 'stats.placeId = place.id')
-      .leftJoin(ReviewMood, 'mood', 'mood.mood = stats.lighting')
-      .groupBy('mood.mood')
-      .addGroupBy('place.id')
-      .having('place.id = :id', { id })
-      .select('COUNT(mood.mood)')
-      .getQuery();
-
-    const ParisedCnt = this.placeRepository
-      .createQueryBuilder('place')
-      .leftJoin(PlaceStats, 'stats', 'stats.placeId = place.id')
-      .leftJoin(ReviewMood, 'mood', 'mood.mood = stats.praised')
-      .groupBy('mood.mood')
-      .addGroupBy('place.id')
-      .having('place.id = :id', { id })
-      .select('COUNT(mood.mood)')
-      .getQuery();
-
-    const ParticipantsAvg = this.placeRepository
-      .createQueryBuilder('place')
-      .leftJoin(PlaceReview, 'review', 'review.placeId = place.id')
-      .where('place.id = :id', { id })
-      .select('ROUND(AVG(participants))', 'participantsAvg')
-      .getQuery();
-
     const query = await this.placeRepository
       .createQueryBuilder('place')
       .leftJoin('place.place_Info', 'info')
@@ -198,16 +142,67 @@ export class PlaceService {
         'review.is_advance_payment as is_advance_payment',
         'review.is_rent as is_rent',
       ])
-      .addSelect(`(${ParticipantsAvg})`, 'participantsAvg')
-      .addSelect(`(${PriceAvg})`, 'priceAvg')
+      .addSelect((sub) => {
+        return sub
+          .subQuery()
+          .from(PlaceReview, 'review')
+          .where('placeId = :id', { id })
+          .select('ROUND(AVG(participants))', 'participantsAvg');
+      }, 'participantsAvg')
+      .addSelect((sub) => {
+        return sub
+          .subQuery()
+          .from(PlaceReview, 'A')
+          .groupBy('A.price_range')
+          .addGroupBy('A.placeId')
+          .having('A.placeId = :id', { id })
+          .orderBy('COUNT(price_range)', 'DESC')
+          .select('price_range')
+          .limit(1);
+      }, 'priceAvg')
       .addSelect([
         'stats.review_cnt as reviewCnt',
         'stats.rating_avrg as ratingAvg',
       ])
-      .addSelect(`(${MoodCnt})`, 'moodCnt')
-      .addSelect(`(${LightingCnt})`, 'lightingCnt')
-      .addSelect(`(${ParisedCnt})`, 'parisedCnt')
-      .addSelect(`(${WantPlaceCnt})`, 'wantPlaceCnt')
+      .addSelect((sub) => {
+        return sub
+          .subQuery()
+          .from(PlaceStats, 'A')
+          .leftJoin(ReviewMood, 'B', 'A.placeId = :id AND A.mood = B.mood', {
+            id,
+          })
+          .select('COUNT(B.mood)');
+      }, 'moodCnt')
+      .addSelect((sub) => {
+        return sub
+          .subQuery()
+          .from(PlaceStats, 'A')
+          .leftJoin(
+            ReviewMood,
+            'B',
+            'A.placeId = :id AND A.lighting = B.mood',
+            {
+              id,
+            },
+          )
+          .select('COUNT(B.mood)');
+      }, 'lightingCnt')
+      .addSelect((sub) => {
+        return sub
+          .subQuery()
+          .from(PlaceStats, 'A')
+          .leftJoin(ReviewMood, 'B', 'A.placeId = :id AND A.praised = B.mood', {
+            id,
+          })
+          .select('COUNT(B.mood)');
+      }, 'parisedCnt')
+      .addSelect((sub) => {
+        return sub
+          .subQuery()
+          .from(WantPlace, 'A')
+          .where('A.placeId = :id', { id })
+          .select('COUNT(A.placeId)');
+      }, 'wantPlaceCnt')
       .getRawOne();
 
     return query;
