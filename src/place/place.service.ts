@@ -10,6 +10,8 @@ import { PlaceReview } from './../place_review/Entity/place_review.entity';
 import { PlaceStats } from './../place_stats/Entity/place_stats.entity';
 import { ReviewMood } from './../review_mood/Entity/review_mood.entity';
 import { WantPlace } from './../want_place/Entity/want_place.entity';
+import { GetPlaceDetail } from './types/getPlaceDetail.type';
+import { GetPlaceSearch } from './types/getPlaceSearch.type';
 
 @Injectable()
 export class PlaceService {
@@ -24,6 +26,17 @@ export class PlaceService {
     const ret = await this.placeRepository.findOne({
       where: {
         kakaoId,
+      },
+      select: ['id'],
+    });
+
+    return !!ret;
+  }
+
+  async isExistsById(id: string): Promise<boolean> {
+    const ret = await this.placeRepository.findOne({
+      where: {
+        id,
       },
       select: ['id'],
     });
@@ -88,7 +101,7 @@ export class PlaceService {
     return await this.placeRepository.findOne({ where: { kakaoId } });
   }
 
-  async findByIdForSearch(id: string) {
+  async findByIdForSearch(id: string): Promise<GetPlaceSearch> {
     const query = await this.placeRepository
       .createQueryBuilder('place')
       .leftJoin('place.place_Info', 'info')
@@ -103,14 +116,21 @@ export class PlaceService {
         'info.address as address',
         'stats.rating_avrg',
         'stats.review_cnt',
+        'stats.mood as mood',
+        'stats.lighting as lighting',
+        'stats.praised as praised',
         'COUNT(want.placeId) as wantplaceCnt',
       ])
       .getRawOne();
 
-    return query;
+    query.wantplaceCnt = parseInt(query.wantplaceCnt);
+
+    const result: GetPlaceSearch = query;
+
+    return result;
   }
 
-  async findPlaceDetail(id: string) {
+  async findPlaceDetail(id: string): Promise<GetPlaceDetail> {
     const query = await this.placeRepository
       .createQueryBuilder('place')
       .leftJoin('place.place_Info', 'info')
@@ -163,6 +183,9 @@ export class PlaceService {
       .addSelect([
         'stats.review_cnt as reviewCnt',
         'stats.rating_avrg as ratingAvg',
+        'stats.mood as mood',
+        'stats.lighting as lighting',
+        'stats.praised as praised',
       ])
       .addSelect((sub) => {
         return sub
@@ -195,7 +218,7 @@ export class PlaceService {
             id,
           })
           .select('COUNT(B.mood)');
-      }, 'parisedCnt')
+      }, 'praisedCnt')
       .addSelect((sub) => {
         return sub
           .subQuery()
@@ -205,6 +228,16 @@ export class PlaceService {
       }, 'wantPlaceCnt')
       .getRawOne();
 
-    return query;
+    query.x = parseFloat(query.x);
+    query.y = parseFloat(query.y);
+    query.participantsAvg = parseInt(query.participantsAvg);
+    query.moodCnt = parseInt(query.moodCnt);
+    query.lightingCnt = parseInt(query.lightingCnt);
+    query.praisedCnt = parseInt(query.praisedCnt);
+    query.wantPlaceCnt = parseInt(query.wantPlaceCnt);
+
+    const result: GetPlaceDetail = query;
+
+    return result;
   }
 }

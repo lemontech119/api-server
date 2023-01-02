@@ -20,6 +20,8 @@ import { AddPlace } from './dto/addPlace.dto';
 import { Place } from './Entity/place.entity';
 import { PlaceInfo } from './Entity/placeInfo.entity';
 import { GetAllPlace } from './types/getAllPlace.type';
+import { GetPlaceDetail } from './types/getPlaceDetail.type';
+import { GetPlaceSearch } from './types/getPlaceSearch.type';
 
 @ApiTags('Place Api')
 @Controller('place')
@@ -110,33 +112,50 @@ export class PlaceController {
     return places;
   }
 
-  @Get('/detail/:kakaoId')
+  @Get('/detail/:id')
   @ApiOperation({
     summary: 'Get Place Details',
     description: '장소 상세 정보',
   })
+  @ApiParam({
+    name: 'kakaoId',
+    required: true,
+    type: String,
+  })
   @ApiResponse({
     description: 'Get Place Details',
+    type: GetPlaceDetail,
   })
-  async getPlaceDetailsByKakaoID(@Param('kakaoId') kakaoId: string) {
-    const place = await this.placeService.kakaoIdByPlace(kakaoId);
+  async getPlaceDetailsByKakaoID(
+    @Param('id') id: string,
+  ): Promise<GetPlaceDetail> {
+    const place = await this.placeService.isExistsById(id);
     if (!place) return;
-    return await this.placeService.findPlaceDetail(place.id);
+
+    return await this.placeService.findPlaceDetail(id);
   }
 
   @Get('/search/:kakaoId')
   @ApiOperation({
-    summary: 'Get Place Details',
-    description: '장소 상세 정보',
+    summary: 'Get Place Search',
+    description: '장소 검색 기본 정보',
+  })
+  @ApiParam({
+    name: 'kakaoId',
+    required: true,
+    type: String,
   })
   @ApiResponse({
-    description: 'Get Place Details',
-    // isArray: true,
+    description: 'Get Place Search Data',
+    type: GetPlaceSearch,
   })
-  async getPlaceByKakaoID(@Param('kakaoId') kakaoId: string) {
+  async getPlaceSearchByKakaId(
+    @Param('kakaoId') kakaoId: string,
+  ): Promise<GetPlaceSearch> {
     const place = await this.placeService.kakaoIdByPlace(kakaoId);
     if (!place) return;
+    const result = await this.placeService.findByIdForSearch(place.id);
 
-    return await this.placeService.findByIdForSearch(place.id);
+    return result;
   }
 }
