@@ -110,7 +110,7 @@ export class PlaceService {
     return query;
   }
 
-  async getPlaceDetail(id: string) {
+  async findPlaceDetail(id: string) {
     const PriceAvg = this.placeRepository
       .createQueryBuilder('place')
       .leftJoin(PlaceReview, 'review', 'review.placeId = place.id')
@@ -160,6 +160,13 @@ export class PlaceService {
       .select('COUNT(mood.mood)')
       .getQuery();
 
+    const ParticipantsAvg = this.placeRepository
+      .createQueryBuilder('place')
+      .leftJoin(PlaceReview, 'review', 'review.placeId = place.id')
+      .where('place.id = :id', { id })
+      .select('ROUND(AVG(participants))', 'participantsAvg')
+      .getQuery();
+
     const query = await this.placeRepository
       .createQueryBuilder('place')
       .leftJoin('place.place_Info', 'info')
@@ -191,7 +198,7 @@ export class PlaceService {
         'review.is_advance_payment as is_advance_payment',
         'review.is_rent as is_rent',
       ])
-      .addSelect('ROUND(AVG(review.participants))', 'participantsAvg')
+      .addSelect(`(${ParticipantsAvg})`, 'participantsAvg')
       .addSelect(`(${PriceAvg})`, 'priceAvg')
       .addSelect([
         'stats.review_cnt as reviewCnt',

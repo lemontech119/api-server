@@ -68,7 +68,6 @@ export class PlaceController {
 
   @Get('/:kakaoId')
   async findByKakaoId(@Param('kakaoId') kakaoId: string) {
-    console.log(kakaoId);
     const isExists = await this.placeService.isExistsByKakaoId(kakaoId);
 
     if (!isExists) throw new NotFoundException('Can not find Place');
@@ -109,5 +108,35 @@ export class PlaceController {
     const places = await this.placeService.findAll();
 
     return places;
+  }
+
+  @Get('/detail/:kakaoId')
+  @ApiOperation({
+    summary: 'Get Place Details',
+    description: '장소 상세 정보',
+  })
+  @ApiResponse({
+    description: 'Get Place Details',
+  })
+  async getPlaceDetailsByKakaoID(@Param('kakaoId') kakaoId: string) {
+    const place = await this.placeService.kakaoIdByPlace(kakaoId);
+    if (!place) return;
+    return await this.placeService.findPlaceDetail(place.id);
+  }
+
+  @Get('/search/:kakaoId')
+  @ApiOperation({
+    summary: 'Get Place Details',
+    description: '장소 상세 정보',
+  })
+  @ApiResponse({
+    description: 'Get Place Details',
+    // isArray: true,
+  })
+  async getPlaceByKakaoID(@Param('kakaoId') kakaoId: string) {
+    const place = await this.placeService.kakaoIdByPlace(kakaoId);
+    if (!place) return;
+
+    return await this.placeService.findByIdForSearch(place.id);
   }
 }
