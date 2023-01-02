@@ -74,7 +74,7 @@ export class PlaceReviewController {
   @ApiResponse({
     status: 201,
     description: 'Place_Review Result',
-    type: PlaceReview,
+    type: Boolean,
   })
   @UseGuards(AuthGuard)
   @UseInterceptors(TransactionInterceptor)

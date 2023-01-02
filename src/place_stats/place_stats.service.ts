@@ -22,7 +22,6 @@ export class PlaceStatsService {
     queryRunnerManager: EntityManager,
   ): Promise<void> {
     try {
-      console.log(placeStats);
       placeStats.place = place;
       placeStats.ratingAvrg = reviewCntAndScore.score;
       placeStats.reviewCnt = reviewCntAndScore.cnt;
