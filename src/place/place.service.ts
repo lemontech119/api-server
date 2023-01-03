@@ -191,7 +191,7 @@ export class PlaceService {
         return sub
           .subQuery()
           .from(PlaceStats, 'A')
-          .leftJoin(ReviewMood, 'B', 'A.placeId = :id AND A.mood = B.mood', {
+          .leftJoin(ReviewMood, 'B', 'B.placeId = :id AND A.mood = B.mood', {
             id,
           })
           .select('COUNT(B.mood)');
@@ -203,7 +203,7 @@ export class PlaceService {
           .leftJoin(
             ReviewMood,
             'B',
-            'A.placeId = :id AND A.lighting = B.mood',
+            'B.placeId = :id AND A.lighting = B.mood',
             {
               id,
             },
@@ -214,7 +214,7 @@ export class PlaceService {
         return sub
           .subQuery()
           .from(PlaceStats, 'A')
-          .leftJoin(ReviewMood, 'B', 'A.placeId = :id AND A.praised = B.mood', {
+          .leftJoin(ReviewMood, 'B', 'B.placeId = :id AND A.praised = B.mood', {
             id,
           })
           .select('COUNT(B.mood)');
