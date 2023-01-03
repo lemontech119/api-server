@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { Place } from './Entity/place.entity';
 import { PlaceInfo } from './Entity/placeInfo.entity';
 import { PlaceInfoService } from './placeInfo.service';
@@ -21,6 +21,7 @@ export class PlaceService {
     @InjectRepository(PlaceInfo)
     private readonly placeRepository: Repository<Place>,
     private readonly placeInfoService: PlaceInfoService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async isExistsByKakaoId(kakaoId: string): Promise<boolean> {
@@ -243,7 +244,14 @@ export class PlaceService {
   }
 
   async placeKeywordSearch() {
-    const query = await this.placeRepository
+    const placeId = this.dataSource
+      .createQueryBuilder()
+      .subQuery()
+      .from(Place, 'p')
+      .select('id')
+      .getQuery();
+
+    const query = await this.dataSource
       .createQueryBuilder()
       .from((sub) => {
         return sub
@@ -254,37 +262,45 @@ export class PlaceService {
               .from(PlaceReview, 'r')
               .groupBy('r.price_range')
               .addGroupBy('r.placeId')
+              .having(`r.placeId IN (${placeId})`)
               .select([
                 'r.placeId as placeId',
-                'r. price_range as priceRange',
-                'count(r.price_range) as cnt',
-                'ROUND(AVG(r.participants))as participantsAvg',
+                'r.price_range as price_range',
                 'is_cork_charge as is_cork_charge',
                 'is_rent as is_rent',
                 'is_room as is_room',
                 'is_reservation as_reservation',
                 'is_parking as is_parking',
                 'is_advance_payment as is_advance_payment',
-              ]);
+              ])
+              .addSelect('ROUND(AVG(r.participants))as participantsAvg')
+              .addSelect('count(r.price_range) as cnt');
           }, 'a')
-          .innerJoin((sub) => {
-            return sub
-              .subQuery()
-              .from((sub) => {
-                return sub
-                  .subQuery()
-                  .from(PlaceReview, 'r')
-                  .groupBy('r.price_range')
-                  .addGroupBy('r.placeId')
-                  .select([
-                    'r.placeId as placeId',
-                    'r.price_range as price_range',
-                  ])
-                  .addSelect('count(r.price_range) as cnt');
-              }, 'c')
-              .groupBy('c.price_range')
-              .select(['c.price_range as price_range', 'max(c.cnt) as max']);
-          }, 'b');
+          .select('a.*')
+          .innerJoin(
+            (sub) => {
+              return sub
+                .subQuery()
+                .from((sub) => {
+                  return sub
+                    .subQuery()
+                    .from(PlaceReview, 'r')
+                    .groupBy('r.price_range')
+                    .addGroupBy('r.placeId')
+                    .having(`r.placeId IN (${placeId})`)
+                    .select([
+                      'r.placeId as placeId',
+                      'r.price_range as price_range',
+                    ])
+                    .addSelect('count(r.price_range) as cnt');
+                }, 'c')
+                .groupBy('c.placeId')
+                .select('c.price_range as price_range')
+                .addSelect('max(cnt) as max');
+            },
+            'b',
+            'a.price_range = b.price_range and a.cnt = b.max',
+          );
       }, 'A')
       .leftJoin(PlaceStats, 'B', 'A.placeId = B.placeId')
       .select('A.*')
@@ -293,8 +309,8 @@ export class PlaceService {
         'B.lighting as lighting',
         'B.praised as praised',
       ])
+      // .where() 추가필요
       .getRawMany();
-
     return query;
   }
 }
