@@ -12,6 +12,7 @@ import { ReviewMood } from './../review_mood/Entity/review_mood.entity';
 import { WantPlace } from './../want_place/Entity/want_place.entity';
 import { GetPlaceDetail } from './types/getPlaceDetail.type';
 import { GetPlaceSearch } from './types/getPlaceSearch.type';
+import { KeywwordSearchDto } from './dto/keywordSearch.dto';
 
 @Injectable()
 export class PlaceService {
@@ -239,5 +240,61 @@ export class PlaceService {
     const result: GetPlaceDetail = query;
 
     return result;
+  }
+
+  async placeKeywordSearch() {
+    const query = await this.placeRepository
+      .createQueryBuilder()
+      .from((sub) => {
+        return sub
+          .subQuery()
+          .from((sub) => {
+            return sub
+              .subQuery()
+              .from(PlaceReview, 'r')
+              .groupBy('r.price_range')
+              .addGroupBy('r.placeId')
+              .select([
+                'r.placeId as placeId',
+                'r. price_range as priceRange',
+                'count(r.price_range) as cnt',
+                'ROUND(AVG(r.participants))as participantsAvg',
+                'is_cork_charge as is_cork_charge',
+                'is_rent as is_rent',
+                'is_room as is_room',
+                'is_reservation as_reservation',
+                'is_parking as is_parking',
+                'is_advance_payment as is_advance_payment',
+              ]);
+          }, 'a')
+          .innerJoin((sub) => {
+            return sub
+              .subQuery()
+              .from((sub) => {
+                return sub
+                  .subQuery()
+                  .from(PlaceReview, 'r')
+                  .groupBy('r.price_range')
+                  .addGroupBy('r.placeId')
+                  .select([
+                    'r.placeId as placeId',
+                    'r.price_range as price_range',
+                  ])
+                  .addSelect('count(r.price_range) as cnt');
+              }, 'c')
+              .groupBy('c.price_range')
+              .select(['c.price_range as price_range', 'max(c.cnt) as max']);
+          }, 'b');
+      }, 'A')
+      .leftJoin(PlaceStats, 'B', 'A.placeId = B.placeId')
+      .select('A.*')
+      .addSelect([
+        'B.mood as mood',
+        'B.lighting as lighting',
+        'B.praised as praised',
+      ])
+      .getRawMany();
+
+    return query;
   }
 }

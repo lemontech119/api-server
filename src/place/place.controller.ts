@@ -31,6 +31,11 @@ export class PlaceController {
     private readonly placeInfoService: PlaceInfoService,
   ) {}
 
+  @Get('/keyword')
+  async KeywwordSearch() {
+    return await this.placeService.placeKeywordSearch();
+  }
+
   @Get('/exists/:kakaoId')
   @ApiOperation({
     summary: 'isExists',
