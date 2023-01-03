@@ -123,7 +123,7 @@ export class AuthService {
     return {
       accessToken,
       accessOption: {
-        domain: 'localhost',
+        // domain: 'localhost',
         path: '/',
         httpOnly: true,
         maxAge: 1000 * 60 * 10,
@@ -139,7 +139,7 @@ export class AuthService {
     return {
       refreshToken,
       refreshOption: {
-        domain: 'localhost',
+        // domain: 'localhost',
         path: '/',
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24,
@@ -154,13 +154,13 @@ export class AuthService {
   logout() {
     return {
       accessOption: {
-        domain: 'localhost',
+        // domain: 'localhost',
         path: '/',
         httpOnly: true,
         maxAge: 0,
       },
       refreshOption: {
-        domain: 'localhost',
+        // domain: 'localhost',
         path: '/',
         httpOnly: true,
         maxAge: 0,
