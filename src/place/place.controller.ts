@@ -5,6 +5,7 @@ import {
   Post,
   Param,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -21,7 +22,8 @@ import { PlaceInfo } from './Entity/placeInfo.entity';
 import { GetAllPlace } from './types/getAllPlace.type';
 import { GetPlaceDetail } from './types/getPlaceDetail.type';
 import { GetPlaceSearch } from './types/getPlaceSearch.type';
-import qs from 'qs';
+import * as qs from 'qs';
+import { KeywordSearchDto } from './dto/keywordSearch.dto';
 
 @ApiTags('Place Api')
 @Controller('place')
@@ -36,9 +38,27 @@ export class PlaceController {
     description: '키워드 검색',
   })
   @Get('/keyword')
-  async KeywwordSearch(@Param('keyword') keyword: string) {
-    const query = qs.parse(keyword);
+  async KeywwordSearch(@Query('keyword') keyword: string) {
+    const query = qs.parse(keyword, {
+      decoder(value) {
+        if (/^(\d+|\d*\.\d+)$/.test(value)) {
+          return parseFloat(value);
+        }
 
+        const keywords = {
+          true: true,
+          false: false,
+          null: null,
+          undefined: undefined,
+        };
+        if (value in keywords) {
+          return keywords[value];
+        }
+
+        return value;
+      },
+    });
+    console.log(query);
     return await this.placeService.placeKeywordSearch(query);
   }
 

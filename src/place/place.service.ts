@@ -12,9 +12,13 @@ import { ReviewMood } from './../review_mood/Entity/review_mood.entity';
 import { WantPlace } from './../want_place/Entity/want_place.entity';
 import { GetPlaceDetail } from './types/getPlaceDetail.type';
 import { GetPlaceSearch } from './types/getPlaceSearch.type';
-import { KeywwordSearchDto } from './dto/keywordSearch.dto';
-import qs from 'qs';
-
+import { KeywordSearchDto } from './dto/keywordSearch.dto';
+import * as qs from 'qs';
+import {
+  ReviewLightingEnum,
+  ReviewMoodEnum,
+  ReviewPraisedEnum,
+} from 'src/review_mood/review_mood.enum';
 @Injectable()
 export class PlaceService {
   constructor(
@@ -244,7 +248,8 @@ export class PlaceService {
     return result;
   }
 
-  async placeKeywordSearch(keyword: qs.ParsedQs) {
+  async placeKeywordSearch(keyword: any) {
+    const { participants, price, mood, lighting, praised, etc } = keyword;
     const placeId = this.dataSource
       .createQueryBuilder()
       .subQuery()
@@ -270,7 +275,7 @@ export class PlaceService {
                 'is_cork_charge as is_cork_charge',
                 'is_rent as is_rent',
                 'is_room as is_room',
-                'is_reservation as_reservation',
+                'is_reservation as is_reservation',
                 'is_parking as is_parking',
                 'is_advance_payment as is_advance_payment',
               ])
@@ -310,8 +315,46 @@ export class PlaceService {
         'B.lighting as lighting',
         'B.praised as praised',
       ])
-      // .where() 추가필요
+      // .where(
+      //   `
+      //   (
+      //     A.participantsAvg >= :min AND
+      //     A.participantsAvg <= :max AND
+      //     A.price_range = :price AND
+      //     B.praised = :praised
+      //     )
+      //    AND
+      //    (
+      //     B.lighting = :lighting OR
+      //     B.mood = :mood
+      //     )
+      //     AND
+      //     (
+      //     A.is_cork_charge = :is_cork_charge AND
+      //     A.is_rent = :is_rent AND
+      //     A.is_room = :is_room AND
+      //     A.is_reservation = :is_reservation AND
+      //     A.is_parking = :is_parking AND
+      //     A.is_advance_payment = :is_advance_payment
+      //     )
+      //   `,
+      //   {
+      //     min: participants['min'],
+      //     max: participants['max'],
+      //     price,
+      //     praised: ReviewPraisedEnum[praised.toString()],
+      //     lighting: ReviewLightingEnum[lighting.toString()],
+      //     mood: ReviewMoodEnum[mood.toString()],
+      //     is_cork_charge: etc['is_cork_charge'],
+      //     is_rent: etc['is_rent'],
+      //     is_room: etc['is_room'],
+      //     is_reservation: etc['is_reservation'],
+      //     is_parking: etc['is_parking'],
+      //     is_advance_payment: etc['is_advance_payment'],
+      //   },
+      // )
       .getRawMany();
+    console.log(query);
     return query;
   }
 }

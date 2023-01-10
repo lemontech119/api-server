@@ -4,11 +4,17 @@ import {
   ReviewMoodEnum,
   ReviewPraisedEnum,
 } from 'src/review_mood/review_mood.enum';
+import { KeywordEtcSearchDto } from './keywordEtcSearch.dto';
 
-export class KeywwordSearchDto {
+type Participants = {
+  min: number;
+  max: number;
+};
+
+export class KeywordSearchDto {
   @IsNumber()
   @IsOptional()
-  participants: number;
+  participants: Participants;
 
   @IsString()
   @IsOptional()
@@ -26,21 +32,5 @@ export class KeywwordSearchDto {
   @IsOptional()
   praised: ReviewPraisedEnum;
 
-  @IsBoolean()
-  is_cork_charge: boolean = false;
-
-  @IsBoolean()
-  is_rent: boolean = false;
-
-  @IsBoolean()
-  is_room: boolean = false;
-
-  @IsBoolean()
-  is_reservation: boolean = false;
-
-  @IsBoolean()
-  is_parking: boolean = false;
-
-  @IsBoolean()
-  is_advance_payment: boolean = false;
+  etc: KeywordEtcSearchDto;
 }
