@@ -4,7 +4,6 @@ import {
   Get,
   Post,
   Param,
-  BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -22,6 +21,7 @@ import { PlaceInfo } from './Entity/placeInfo.entity';
 import { GetAllPlace } from './types/getAllPlace.type';
 import { GetPlaceDetail } from './types/getPlaceDetail.type';
 import { GetPlaceSearch } from './types/getPlaceSearch.type';
+import qs from 'qs';
 
 @ApiTags('Place Api')
 @Controller('place')
@@ -31,9 +31,15 @@ export class PlaceController {
     private readonly placeInfoService: PlaceInfoService,
   ) {}
 
+  @ApiOperation({
+    summary: 'Keyword Search',
+    description: '키워드 검색',
+  })
   @Get('/keyword')
-  async KeywwordSearch() {
-    return await this.placeService.placeKeywordSearch();
+  async KeywwordSearch(@Param('keyword') keyword: string) {
+    const query = qs.parse(keyword);
+
+    return await this.placeService.placeKeywordSearch(query);
   }
 
   @Get('/exists/:kakaoId')

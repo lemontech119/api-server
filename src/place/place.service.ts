@@ -13,6 +13,7 @@ import { WantPlace } from './../want_place/Entity/want_place.entity';
 import { GetPlaceDetail } from './types/getPlaceDetail.type';
 import { GetPlaceSearch } from './types/getPlaceSearch.type';
 import { KeywwordSearchDto } from './dto/keywordSearch.dto';
+import qs from 'qs';
 
 @Injectable()
 export class PlaceService {
@@ -243,7 +244,7 @@ export class PlaceService {
     return result;
   }
 
-  async placeKeywordSearch() {
+  async placeKeywordSearch(keyword: qs.ParsedQs) {
     const placeId = this.dataSource
       .createQueryBuilder()
       .subQuery()
