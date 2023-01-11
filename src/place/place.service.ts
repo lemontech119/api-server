@@ -248,8 +248,9 @@ export class PlaceService {
     return result;
   }
 
-  async placeKeywordSearch(keyword: any) {
+  async placeKeywordSearch(keyword: KeywordSearchDto) {
     const { participants, price, mood, lighting, praised, etc } = keyword;
+
     const placeId = this.dataSource
       .createQueryBuilder()
       .subQuery()
@@ -336,44 +337,45 @@ export class PlaceService {
         'C.is_parking as is_parking',
         'C.is_advance_payment as is_advance_payment',
       ])
-      // .where(
-      //   `
-      //   (
-      //     A.participantsAvg >= :min AND
-      //     A.participantsAvg <= :max AND
-      //     A.price_range = :price AND
-      //     B.praised = :praised
-      //     )
-      //    AND
-      //    (
-      //     B.lighting = :lighting OR
-      //     B.mood = :mood
-      //     )
-      //     AND
-      //     (
-      //     A.is_cork_charge = :is_cork_charge AND
-      //     A.is_rent = :is_rent AND
-      //     A.is_room = :is_room AND
-      //     A.is_reservation = :is_reservation AND
-      //     A.is_parking = :is_parking AND
-      //     A.is_advance_payment = :is_advance_payment
-      //     )
-      //   `,
-      //   {
-      //     min: participants['min'],
-      //     max: participants['max'],
-      //     price,
-      //     praised: ReviewPraisedEnum[praised.toString()],
-      //     lighting: ReviewLightingEnum[lighting.toString()],
-      //     mood: ReviewMoodEnum[mood.toString()],
-      //     is_cork_charge: etc['is_cork_charge'],
-      //     is_rent: etc['is_rent'],
-      //     is_room: etc['is_room'],
-      //     is_reservation: etc['is_reservation'],
-      //     is_parking: etc['is_parking'],
-      //     is_advance_payment: etc['is_advance_payment'],
-      //   },
-      // )
+      .where(
+        /* 키워드 검색 조건 */
+        `
+        (
+          A.participantsAvg >= :min AND
+          A.participantsAvg <= :max AND
+          A.price_range = :price AND
+          B.praised = :praised
+          )
+         AND
+         (
+          B.lighting = :lighting OR
+          B.mood = :mood
+          )
+          AND
+          (
+          A.is_cork_charge = :is_cork_charge AND
+          A.is_rent = :is_rent AND
+          A.is_room = :is_room AND
+          A.is_reservation = :is_reservation AND
+          A.is_parking = :is_parking AND
+          A.is_advance_payment = :is_advance_payment
+          )
+        `,
+        {
+          min: participants.min,
+          max: participants.max,
+          price,
+          praised,
+          lighting,
+          mood,
+          is_cork_charge: etc.is_cork_charge,
+          is_rent: etc.is_rent,
+          is_room: etc.is_room,
+          is_reservation: etc.is_reservation,
+          is_parking: etc.is_parking,
+          is_advance_payment: etc.is_advance_payment,
+        },
+      )
       .getRawMany();
     console.log(query);
     return query;

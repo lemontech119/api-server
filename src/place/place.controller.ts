@@ -24,6 +24,11 @@ import { GetPlaceDetail } from './types/getPlaceDetail.type';
 import { GetPlaceSearch } from './types/getPlaceSearch.type';
 import * as qs from 'qs';
 import { KeywordSearchDto } from './dto/keywordSearch.dto';
+import {
+  ReviewLightingEnum,
+  ReviewMoodEnum,
+  ReviewPraisedEnum,
+} from 'src/review_mood/review_mood.enum';
 
 @ApiTags('Place Api')
 @Controller('place')
@@ -39,6 +44,7 @@ export class PlaceController {
   })
   @Get('/keyword')
   async KeywwordSearch(@Query('keyword') keyword: string) {
+    /* 키워드 파싱 */
     const query = qs.parse(keyword, {
       decoder(value) {
         if (/^(\d+|\d*\.\d+)$/.test(value)) {
@@ -58,8 +64,29 @@ export class PlaceController {
         return value;
       },
     });
-    console.log(query);
-    return await this.placeService.placeKeywordSearch(query);
+
+    const { participants, price, mood, lighting, praised, etc } = query;
+
+    /* 키워드 */
+    const kyeword: KeywordSearchDto = {
+      participants: {
+        min: Number(participants['min']),
+        max: Number(participants['max']),
+      },
+      price: price.toString(),
+      praised: ReviewPraisedEnum[praised.toString()],
+      lighting: ReviewLightingEnum[lighting.toString()],
+      mood: ReviewMoodEnum[mood.toString()],
+      etc: {
+        is_cork_charge: etc['is_cork_charge'],
+        is_rent: etc['is_rent'],
+        is_room: etc['is_room'],
+        is_reservation: etc['is_reservation'],
+        is_parking: etc['is_parking'],
+        is_advance_payment: etc['is_advance_payment'],
+      },
+    };
+    return await this.placeService.placeKeywordSearch(kyeword);
   }
 
   @Get('/exists/:kakaoId')
