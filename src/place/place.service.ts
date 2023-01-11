@@ -380,4 +380,51 @@ export class PlaceService {
     console.log(query);
     return query;
   }
+
+  parseKeyword(keywordData: any) {
+    /* 키워드 파싱 */
+    const query = qs.parse(keywordData, {
+      decoder(value) {
+        if (/^(\d+|\d*\.\d+)$/.test(value)) {
+          return parseFloat(value);
+        }
+
+        const keywords = {
+          true: true,
+          false: false,
+          null: null,
+          undefined: undefined,
+        };
+        if (value in keywords) {
+          return keywords[value];
+        }
+
+        return value;
+      },
+    });
+
+    const { participants, price, mood, lighting, praised, etc } = query;
+
+    /* 키워드 */
+    const keyword: KeywordSearchDto = {
+      participants: {
+        min: Number(participants['min']),
+        max: Number(participants['max']),
+      },
+      price: price.toString(),
+      praised: ReviewPraisedEnum[praised.toString()],
+      lighting: ReviewLightingEnum[lighting.toString()],
+      mood: ReviewMoodEnum[mood.toString()],
+      etc: {
+        is_cork_charge: etc['is_cork_charge'],
+        is_rent: etc['is_rent'],
+        is_room: etc['is_room'],
+        is_reservation: etc['is_reservation'],
+        is_parking: etc['is_parking'],
+        is_advance_payment: etc['is_advance_payment'],
+      },
+    };
+
+    return keyword;
+  }
 }
