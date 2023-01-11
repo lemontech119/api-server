@@ -13,6 +13,7 @@ import {
   ApiTags,
   ApiParam,
   ApiResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { PlaceService } from './place.service';
 import { PlaceInfoService } from './placeInfo.service';
@@ -41,6 +42,11 @@ export class PlaceController {
   @ApiOperation({
     summary: 'Keyword Search',
     description: '키워드 검색',
+  })
+  @ApiQuery({
+    name: 'keyword',
+    type: String,
+    description: '키워드 검색 qs 파싱후 전달',
   })
   @Get('/keyword')
   async KeywwordSearch(@Query('keyword') keyword: string) {
