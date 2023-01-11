@@ -269,16 +269,7 @@ export class PlaceService {
               .groupBy('r.price_range')
               .addGroupBy('r.placeId')
               .having(`r.placeId IN (${placeId})`)
-              .select([
-                'r.placeId as placeId',
-                'r.price_range as price_range',
-                'is_cork_charge as is_cork_charge',
-                'is_rent as is_rent',
-                'is_room as is_room',
-                'is_reservation as is_reservation',
-                'is_parking as is_parking',
-                'is_advance_payment as is_advance_payment',
-              ])
+              .select(['r.placeId as placeId', 'r.price_range as price_range'])
               .addSelect('ROUND(AVG(r.participants))as participantsAvg')
               .addSelect('count(r.price_range) as cnt');
           }, 'a')
@@ -301,19 +292,49 @@ export class PlaceService {
                     .addSelect('count(r.price_range) as cnt');
                 }, 'c')
                 .groupBy('c.placeId')
-                .select('c.price_range as price_range')
+                .select([
+                  'c.placeId as placeId',
+                  'c.price_range as price_range',
+                ])
                 .addSelect('max(cnt) as max');
             },
             'b',
-            'a.price_range = b.price_range and a.cnt = b.max',
+            'a.placeId = b.placeId and a.cnt = b.max',
           );
       }, 'A')
       .leftJoin(PlaceStats, 'B', 'A.placeId = B.placeId')
+      .leftJoin(
+        (sub) => {
+          return sub
+            .subQuery()
+            .from(PlaceReview, 'r')
+            .groupBy('r.placeId')
+            .select([
+              'r.placeId as placeId',
+              'MAX(is_cork_charge) as is_cork_charge',
+              'MAX(is_room) as is_room',
+              'Max(is_reservation) as is_reservation',
+              'MAX(is_parking) as is_parking',
+              'Max(is_advance_payment) as is_advance_payment',
+              'Max(is_rent) as is_rent',
+            ]);
+        },
+        'C',
+        'A.placeId = C.placeId',
+      )
       .select('A.*')
       .addSelect([
         'B.mood as mood',
         'B.lighting as lighting',
         'B.praised as praised',
+      ])
+      .addSelect([
+        'C.is_cork_charge as is_cork_charge',
+        'C.is_rent as is_rent',
+        'C.is_room as is_room',
+        'C.is_reservation as is_reservation',
+        'C.is_parking as is_parking',
+        'C.is_advance_payment as is_advance_payment',
       ])
       // .where(
       //   `
