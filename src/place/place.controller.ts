@@ -23,6 +23,7 @@ import { PlaceInfo } from './Entity/placeInfo.entity';
 import { GetAllPlace } from './types/getAllPlace.type';
 import { GetPlaceDetail } from './types/getPlaceDetail.type';
 import { GetPlaceSearch } from './types/getPlaceSearch.type';
+
 @ApiTags('Place Api')
 @Controller('place')
 export class PlaceController {
@@ -30,21 +31,6 @@ export class PlaceController {
     private readonly placeService: PlaceService,
     private readonly placeInfoService: PlaceInfoService,
   ) {}
-
-  @ApiOperation({
-    summary: 'Keyword Search',
-    description: '키워드 검색',
-  })
-  @ApiQuery({
-    name: 'keyword',
-    type: String,
-    description: '키워드 검색 qs 파싱후 전달',
-  })
-  @Get('/keyword')
-  async KeywwordSearch(@Query('keyword') keyword: string) {
-    const parseKeyword = this.placeService.parseKeyword(keyword);
-    return await this.placeService.placeKeywordSearch(parseKeyword);
-  }
 
   @Get('/exists/:kakaoId')
   @ApiOperation({
@@ -61,7 +47,9 @@ export class PlaceController {
     type: Boolean,
     status: 200,
   })
-  async isExsitsKakaoPlace(@Param('kakaoId') kakaoId: string) {
+  async isExsitsKakaoPlace(
+    @Param('kakaoId') kakaoId: string,
+  ): Promise<boolean> {
     const isExists = await this.placeService.isExistsByKakaoId(kakaoId);
 
     return isExists;
@@ -77,21 +65,10 @@ export class PlaceController {
     description: 'place',
     type: Place,
   })
-  async add(@Body() addPlace: AddPlace) {
+  async add(@Body() addPlace: AddPlace): Promise<Place> {
     const place = await this.placeService.createPlace(addPlace);
 
     return place;
-  }
-
-  @Get('/:kakaoId')
-  async findByKakaoId(@Param('kakaoId') kakaoId: string) {
-    const isExists = await this.placeService.isExistsByKakaoId(kakaoId);
-
-    if (!isExists) throw new NotFoundException('Can not find Place');
-
-    const place = await this.placeService.kakaoIdByPlace(kakaoId);
-
-    return await this.placeService.findByIdForSearch(place.id);
   }
 
   @Get('/info/:id')
@@ -172,5 +149,33 @@ export class PlaceController {
     const result = await this.placeService.findByIdForSearch(place.id);
 
     return result;
+  }
+
+  @ApiOperation({
+    summary: 'Keyword Search',
+    description: '키워드 검색 qs 파싱후 전달',
+  })
+  @ApiQuery({
+    name: 'keyword',
+    type: GetPlaceSearch,
+    isArray: true,
+  })
+  @Get('/keyword')
+  async KeywwordSearch(
+    @Query('keyword') keyword: string,
+  ): Promise<GetPlaceSearch[]> {
+    const parseKeyword = this.placeService.parseKeyword(keyword);
+    return await this.placeService.placeKeywordSearch(parseKeyword);
+  }
+
+  @Get('/:kakaoId')
+  async findByKakaoId(@Param('kakaoId') kakaoId: string) {
+    const isExists = await this.placeService.isExistsByKakaoId(kakaoId);
+
+    if (!isExists) throw new NotFoundException('Can not find Place');
+
+    const place = await this.placeService.kakaoIdByPlace(kakaoId);
+
+    return await this.placeService.findByIdForSearch(place.id);
   }
 }

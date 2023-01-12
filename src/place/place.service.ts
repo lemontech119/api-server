@@ -285,7 +285,9 @@ export class PlaceService {
     return result;
   }
 
-  async placeKeywordSearch(keyword: KeywordSearchDto) {
+  async placeKeywordSearch(
+    keyword: KeywordSearchDto,
+  ): Promise<GetPlaceSearch[]> {
     const { participants, price, mood, lighting, praised, etc } = keyword;
 
     const placeId = this.dataSource
@@ -389,6 +391,7 @@ export class PlaceService {
         'D.category as category',
         'D.x as x',
         'D.y as y',
+        'D.wantPlaceCnt as wantPlaceCnt',
       ])
       .addSelect([
         'B.mood as mood',
@@ -438,7 +441,13 @@ export class PlaceService {
         },
       )
       .getRawMany();
-    return query;
+
+    const result: GetPlaceSearch[] = query.map((q) => {
+      q.wantPlaceCnt = parseInt(q.wantPlaceCnt);
+      return q;
+    });
+
+    return result;
   }
 
   parseKeyword(keywordData: any) {
