@@ -23,14 +23,6 @@ import { PlaceInfo } from './Entity/placeInfo.entity';
 import { GetAllPlace } from './types/getAllPlace.type';
 import { GetPlaceDetail } from './types/getPlaceDetail.type';
 import { GetPlaceSearch } from './types/getPlaceSearch.type';
-import * as qs from 'qs';
-import { KeywordSearchDto } from './dto/keywordSearch.dto';
-import {
-  ReviewLightingEnum,
-  ReviewMoodEnum,
-  ReviewPraisedEnum,
-} from 'src/review_mood/review_mood.enum';
-
 @ApiTags('Place Api')
 @Controller('place')
 export class PlaceController {

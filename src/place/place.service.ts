@@ -138,14 +138,73 @@ export class PlaceService {
   }
 
   async findPlaceDetail(id: string): Promise<GetPlaceDetail> {
-    const query = await this.placeRepository
-      .createQueryBuilder('place')
-      .leftJoin('place.place_Info', 'info')
-      .leftJoin(PlaceReview, 'review', 'review.placeId = place.id')
+    const query = await this.dataSource
+      .createQueryBuilder()
+      .from((sub) => {
+        return sub
+          .subQuery()
+          .from(Place, 'p')
+          .leftJoin(WantPlace, 'w', 'p.id = w.placeId')
+          .groupBy('p.id')
+          .having('p.id = :id', { id })
+          .select([
+            'p.id as id',
+            'p.kakaoId as kakaoId',
+            'p.name as name',
+            'p.category as category',
+            'p.x as x',
+            'p.y as y',
+            'p.placeInfoId as placeInfoId',
+          ])
+          .addSelect('COUNT(w.placeId)', 'wantPlaceCnt');
+      }, 'place')
+      .leftJoin(PlaceInfo, 'info', 'place.placeInfoId = info.id')
+      .leftJoin(
+        (sub) => {
+          return sub
+            .subQuery()
+            .from((sub) => {
+              return sub
+                .subQuery()
+                .from(PlaceReview, 'a')
+                .groupBy('a.placeId')
+                .addGroupBy('a.price_range')
+                .having('a.placeId = :id', { id })
+                .select([
+                  'a.placeId as placeId',
+                  'a.price_range as price_range',
+                  'COUNT(a.price_range) as cnt',
+                  'ROUND(AVG(a.participants)) as parAvg',
+                  'MAX(a.is_cork_charge) as is_cork_charge',
+                  'MAX(a.is_room) as is_room',
+                  'MAX(a.is_reservation) as is_reservation',
+                  'MAX(a.is_parking) as is_parking',
+                  'MAX(a.is_advance_payment) as is_advance_payment',
+                  'MAX(a.is_rent) as is_rent',
+                  'MAX(a.createdAt) as createdAt',
+                ]);
+            }, 'r')
+            .innerJoin(PlaceReview, 'i', 'r.createdAt = i.createdAt')
+            .select([
+              'r.placeId as placeId',
+              'i.simple_review as simple_review',
+              'MAX(r.createdAt) as createdAt',
+              'MAX(r.cnt) as cnt',
+              'r.price_range as price_range',
+              'ROUND(AVG(r.parAvg)) as participantsAvg',
+              'MAX(r.is_cork_charge) as is_cork_charge',
+              'MAX(r.is_room) as is_room',
+              'MAX(r.is_reservation) as is_reservation',
+              'MAX(r.is_parking) as is_parking',
+              'MAX(r.is_advance_payment) as is_advance_payment',
+              'MAX(r.is_rent) as is_rent',
+            ]);
+        },
+        'review',
+        'review.placeId = place.id',
+      )
       .leftJoin(PlaceStats, 'stats', 'stats.placeId =  place.id')
       .where('place.id = :id', { id })
-      .orderBy('review.createdAt', 'DESC')
-      .limit(1)
       .select([
         'place.id as id',
         'place.kakaoId as kakaoId',
@@ -153,6 +212,7 @@ export class PlaceService {
         'place.x as x',
         'place.y as y',
         'place.category as category',
+        'place.wantPlaceCnt as wantPlaceCnt',
       ])
       .addSelect([
         'info.url as url',
@@ -160,6 +220,8 @@ export class PlaceService {
         'info.roadAddress as roadAddress',
       ])
       .addSelect([
+        'review.participantsAvg as participantsAvg',
+        'review.price_range as priceRange',
         'review.simple_review as simple_review',
         'review.createdAt',
         'review.is_cork_charge as is_cork_charge',
@@ -169,24 +231,6 @@ export class PlaceService {
         'review.is_advance_payment as is_advance_payment',
         'review.is_rent as is_rent',
       ])
-      .addSelect((sub) => {
-        return sub
-          .subQuery()
-          .from(PlaceReview, 'review')
-          .where('placeId = :id', { id })
-          .select('ROUND(AVG(participants))', 'participantsAvg');
-      }, 'participantsAvg')
-      .addSelect((sub) => {
-        return sub
-          .subQuery()
-          .from(PlaceReview, 'A')
-          .groupBy('A.price_range')
-          .addGroupBy('A.placeId')
-          .having('A.placeId = :id', { id })
-          .orderBy('COUNT(price_range)', 'DESC')
-          .select('price_range')
-          .limit(1);
-      }, 'priceAvg')
       .addSelect([
         'stats.review_cnt as reviewCnt',
         'stats.rating_avrg as ratingAvg',
@@ -226,13 +270,6 @@ export class PlaceService {
           })
           .select('COUNT(B.mood)');
       }, 'praisedCnt')
-      .addSelect((sub) => {
-        return sub
-          .subQuery()
-          .from(WantPlace, 'A')
-          .where('A.placeId = :id', { id })
-          .select('COUNT(A.placeId)');
-      }, 'wantPlaceCnt')
       .getRawOne();
 
     query.x = parseFloat(query.x);
@@ -337,13 +374,14 @@ export class PlaceService {
               'p.category as category',
               'p.x as x',
               'p.y as y',
+              'p.placeInfoId as placeInfoId',
             ])
             .addSelect('COUNT(w.id) as wantPlaceCnt');
         },
         'D',
         'D.Id = A.placeId',
       )
-      .leftJoin(PlaceInfo, 'E', 'D.placeInfoId = E.placeId')
+      .leftJoin(PlaceInfo, 'E', 'D.placeInfoId = E.id')
       .select([
         'D.id as id',
         'D.name as name',
