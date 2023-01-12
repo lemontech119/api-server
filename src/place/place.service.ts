@@ -323,20 +323,43 @@ export class PlaceService {
         'C',
         'A.placeId = C.placeId',
       )
-      .select('A.*')
+      .leftJoin(
+        (sub) => {
+          return sub
+            .subQuery()
+            .from(Place, 'p')
+            .leftJoin(WantPlace, 'w', 'p.id = w.placeId')
+            .groupBy('p.id')
+            .select([
+              'p.id as id',
+              'p.name as name',
+              'p.kakaoId as kakaoid',
+              'p.category as category',
+              'p.x as x',
+              'p.y as y',
+            ])
+            .addSelect('COUNT(w.id) as wantPlaceCnt');
+        },
+        'D',
+        'D.Id = A.placeId',
+      )
+      .leftJoin(PlaceInfo, 'E', 'D.placeInfoId = E.placeId')
+      .select([
+        'D.id as id',
+        'D.name as name',
+        'D.kakaoId as kakaoid',
+        'D.category as category',
+        'D.x as x',
+        'D.y as y',
+      ])
       .addSelect([
         'B.mood as mood',
         'B.lighting as lighting',
         'B.praised as praised',
+        'B.review_cnt as review_cnt',
+        'B.rating_avrg as rating_avrg',
       ])
-      .addSelect([
-        'C.is_cork_charge as is_cork_charge',
-        'C.is_rent as is_rent',
-        'C.is_room as is_room',
-        'C.is_reservation as is_reservation',
-        'C.is_parking as is_parking',
-        'C.is_advance_payment as is_advance_payment',
-      ])
+      .addSelect('E.address')
       .where(
         /* 키워드 검색 조건 */
         `
@@ -377,7 +400,6 @@ export class PlaceService {
         },
       )
       .getRawMany();
-    console.log(query);
     return query;
   }
 
