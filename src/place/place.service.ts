@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { Place } from './Entity/place.entity';
 import { PlaceInfo } from './Entity/placeInfo.entity';
 import { PlaceInfoService } from './placeInfo.service';
@@ -12,7 +12,13 @@ import { ReviewMood } from './../review_mood/Entity/review_mood.entity';
 import { WantPlace } from './../want_place/Entity/want_place.entity';
 import { GetPlaceDetail } from './types/getPlaceDetail.type';
 import { GetPlaceSearch } from './types/getPlaceSearch.type';
-
+import { KeywordSearchDto } from './dto/keywordSearch.dto';
+import * as qs from 'qs';
+import {
+  ReviewLightingEnum,
+  ReviewMoodEnum,
+  ReviewPraisedEnum,
+} from 'src/review_mood/review_mood.enum';
 @Injectable()
 export class PlaceService {
   constructor(
@@ -20,6 +26,7 @@ export class PlaceService {
     @InjectRepository(PlaceInfo)
     private readonly placeRepository: Repository<Place>,
     private readonly placeInfoService: PlaceInfoService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async isExistsByKakaoId(kakaoId: string): Promise<boolean> {
@@ -131,14 +138,73 @@ export class PlaceService {
   }
 
   async findPlaceDetail(id: string): Promise<GetPlaceDetail> {
-    const query = await this.placeRepository
-      .createQueryBuilder('place')
-      .leftJoin('place.place_Info', 'info')
-      .leftJoin(PlaceReview, 'review', 'review.placeId = place.id')
+    const query = await this.dataSource
+      .createQueryBuilder()
+      .from((sub) => {
+        return sub
+          .subQuery()
+          .from(Place, 'p')
+          .leftJoin(WantPlace, 'w', 'p.id = w.placeId')
+          .groupBy('p.id')
+          .having('p.id = :id', { id })
+          .select([
+            'p.id as id',
+            'p.kakaoId as kakaoId',
+            'p.name as name',
+            'p.category as category',
+            'p.x as x',
+            'p.y as y',
+            'p.placeInfoId as placeInfoId',
+          ])
+          .addSelect('COUNT(w.placeId)', 'wantPlaceCnt');
+      }, 'place')
+      .leftJoin(PlaceInfo, 'info', 'place.placeInfoId = info.id')
+      .leftJoin(
+        (sub) => {
+          return sub
+            .subQuery()
+            .from((sub) => {
+              return sub
+                .subQuery()
+                .from(PlaceReview, 'a')
+                .groupBy('a.placeId')
+                .addGroupBy('a.price_range')
+                .having('a.placeId = :id', { id })
+                .select([
+                  'a.placeId as placeId',
+                  'a.price_range as price_range',
+                  'COUNT(a.price_range) as cnt',
+                  'ROUND(AVG(a.participants)) as parAvg',
+                  'MAX(a.is_cork_charge) as is_cork_charge',
+                  'MAX(a.is_room) as is_room',
+                  'MAX(a.is_reservation) as is_reservation',
+                  'MAX(a.is_parking) as is_parking',
+                  'MAX(a.is_advance_payment) as is_advance_payment',
+                  'MAX(a.is_rent) as is_rent',
+                  'MAX(a.createdAt) as createdAt',
+                ]);
+            }, 'r')
+            .innerJoin(PlaceReview, 'i', 'r.createdAt = i.createdAt')
+            .select([
+              'r.placeId as placeId',
+              'i.simple_review as simple_review',
+              'MAX(r.createdAt) as createdAt',
+              'MAX(r.cnt) as cnt',
+              'r.price_range as price_range',
+              'ROUND(AVG(r.parAvg)) as participantsAvg',
+              'MAX(r.is_cork_charge) as is_cork_charge',
+              'MAX(r.is_room) as is_room',
+              'MAX(r.is_reservation) as is_reservation',
+              'MAX(r.is_parking) as is_parking',
+              'MAX(r.is_advance_payment) as is_advance_payment',
+              'MAX(r.is_rent) as is_rent',
+            ]);
+        },
+        'review',
+        'review.placeId = place.id',
+      )
       .leftJoin(PlaceStats, 'stats', 'stats.placeId =  place.id')
       .where('place.id = :id', { id })
-      .orderBy('review.createdAt', 'DESC')
-      .limit(1)
       .select([
         'place.id as id',
         'place.kakaoId as kakaoId',
@@ -146,6 +212,7 @@ export class PlaceService {
         'place.x as x',
         'place.y as y',
         'place.category as category',
+        'place.wantPlaceCnt as wantPlaceCnt',
       ])
       .addSelect([
         'info.url as url',
@@ -153,6 +220,8 @@ export class PlaceService {
         'info.roadAddress as roadAddress',
       ])
       .addSelect([
+        'review.participantsAvg as participantsAvg',
+        'review.price_range as priceRange',
         'review.simple_review as simple_review',
         'review.createdAt',
         'review.is_cork_charge as is_cork_charge',
@@ -162,24 +231,6 @@ export class PlaceService {
         'review.is_advance_payment as is_advance_payment',
         'review.is_rent as is_rent',
       ])
-      .addSelect((sub) => {
-        return sub
-          .subQuery()
-          .from(PlaceReview, 'review')
-          .where('placeId = :id', { id })
-          .select('ROUND(AVG(participants))', 'participantsAvg');
-      }, 'participantsAvg')
-      .addSelect((sub) => {
-        return sub
-          .subQuery()
-          .from(PlaceReview, 'A')
-          .groupBy('A.price_range')
-          .addGroupBy('A.placeId')
-          .having('A.placeId = :id', { id })
-          .orderBy('COUNT(price_range)', 'DESC')
-          .select('price_range')
-          .limit(1);
-      }, 'priceAvg')
       .addSelect([
         'stats.review_cnt as reviewCnt',
         'stats.rating_avrg as ratingAvg',
@@ -219,13 +270,6 @@ export class PlaceService {
           })
           .select('COUNT(B.mood)');
       }, 'praisedCnt')
-      .addSelect((sub) => {
-        return sub
-          .subQuery()
-          .from(WantPlace, 'A')
-          .where('A.placeId = :id', { id })
-          .select('COUNT(A.placeId)');
-      }, 'wantPlaceCnt')
       .getRawOne();
 
     query.x = parseFloat(query.x);
@@ -239,5 +283,217 @@ export class PlaceService {
     const result: GetPlaceDetail = query;
 
     return result;
+  }
+
+  async placeKeywordSearch(
+    keyword: KeywordSearchDto,
+  ): Promise<GetPlaceSearch[]> {
+    const { participants, price, mood, lighting, praised, etc } = keyword;
+
+    const placeId = this.dataSource
+      .createQueryBuilder()
+      .subQuery()
+      .from(Place, 'p')
+      .select('id')
+      .getQuery();
+
+    const query = await this.dataSource
+      .createQueryBuilder()
+      .from((sub) => {
+        return sub
+          .subQuery()
+          .from((sub) => {
+            return sub
+              .subQuery()
+              .from(PlaceReview, 'r')
+              .groupBy('r.price_range')
+              .addGroupBy('r.placeId')
+              .having(`r.placeId IN (${placeId})`)
+              .select(['r.placeId as placeId', 'r.price_range as price_range'])
+              .addSelect('ROUND(AVG(r.participants))as participantsAvg')
+              .addSelect('count(r.price_range) as cnt');
+          }, 'a')
+          .select('a.*')
+          .innerJoin(
+            (sub) => {
+              return sub
+                .subQuery()
+                .from((sub) => {
+                  return sub
+                    .subQuery()
+                    .from(PlaceReview, 'r')
+                    .groupBy('r.price_range')
+                    .addGroupBy('r.placeId')
+                    .having(`r.placeId IN (${placeId})`)
+                    .select([
+                      'r.placeId as placeId',
+                      'r.price_range as price_range',
+                    ])
+                    .addSelect('count(r.price_range) as cnt');
+                }, 'c')
+                .groupBy('c.placeId')
+                .select([
+                  'c.placeId as placeId',
+                  'c.price_range as price_range',
+                ])
+                .addSelect('max(cnt) as max');
+            },
+            'b',
+            'a.placeId = b.placeId and a.cnt = b.max',
+          );
+      }, 'A')
+      .leftJoin(PlaceStats, 'B', 'A.placeId = B.placeId')
+      .leftJoin(
+        (sub) => {
+          return sub
+            .subQuery()
+            .from(PlaceReview, 'r')
+            .groupBy('r.placeId')
+            .select([
+              'r.placeId as placeId',
+              'MAX(is_cork_charge) as is_cork_charge',
+              'MAX(is_room) as is_room',
+              'Max(is_reservation) as is_reservation',
+              'MAX(is_parking) as is_parking',
+              'Max(is_advance_payment) as is_advance_payment',
+              'Max(is_rent) as is_rent',
+            ]);
+        },
+        'C',
+        'A.placeId = C.placeId',
+      )
+      .leftJoin(
+        (sub) => {
+          return sub
+            .subQuery()
+            .from(Place, 'p')
+            .leftJoin(WantPlace, 'w', 'p.id = w.placeId')
+            .groupBy('p.id')
+            .select([
+              'p.id as id',
+              'p.name as name',
+              'p.kakaoId as kakaoid',
+              'p.category as category',
+              'p.x as x',
+              'p.y as y',
+              'p.placeInfoId as placeInfoId',
+            ])
+            .addSelect('COUNT(w.id) as wantPlaceCnt');
+        },
+        'D',
+        'D.Id = A.placeId',
+      )
+      .leftJoin(PlaceInfo, 'E', 'D.placeInfoId = E.id')
+      .select([
+        'D.id as id',
+        'D.name as name',
+        'D.kakaoId as kakaoid',
+        'D.category as category',
+        'D.x as x',
+        'D.y as y',
+        'D.wantPlaceCnt as wantPlaceCnt',
+      ])
+      .addSelect([
+        'B.mood as mood',
+        'B.lighting as lighting',
+        'B.praised as praised',
+        'B.review_cnt as review_cnt',
+        'B.rating_avrg as rating_avrg',
+      ])
+      .addSelect('E.address')
+      .where(
+        /* 키워드 검색 조건 */
+        `
+        (
+          A.participantsAvg >= :min AND
+          A.participantsAvg <= :max AND
+          A.price_range = :price AND
+          B.praised = :praised
+          )
+         AND
+         (
+          B.lighting = :lighting OR
+          B.mood = :mood
+          )
+          AND
+          (
+          A.is_cork_charge = :is_cork_charge AND
+          A.is_rent = :is_rent AND
+          A.is_room = :is_room AND
+          A.is_reservation = :is_reservation AND
+          A.is_parking = :is_parking AND
+          A.is_advance_payment = :is_advance_payment
+          )
+        `,
+        {
+          min: participants.min,
+          max: participants.max,
+          price,
+          praised,
+          lighting,
+          mood,
+          is_cork_charge: etc.is_cork_charge,
+          is_rent: etc.is_rent,
+          is_room: etc.is_room,
+          is_reservation: etc.is_reservation,
+          is_parking: etc.is_parking,
+          is_advance_payment: etc.is_advance_payment,
+        },
+      )
+      .getRawMany();
+
+    const result: GetPlaceSearch[] = query.map((q) => {
+      q.wantPlaceCnt = parseInt(q.wantPlaceCnt);
+      return q;
+    });
+
+    return result;
+  }
+
+  parseKeyword(keywordData: any) {
+    /* 키워드 파싱 */
+    const query = qs.parse(keywordData, {
+      decoder(value) {
+        if (/^(\d+|\d*\.\d+)$/.test(value)) {
+          return parseFloat(value);
+        }
+
+        const keywords = {
+          true: true,
+          false: false,
+          null: null,
+          undefined: undefined,
+        };
+        if (value in keywords) {
+          return keywords[value];
+        }
+
+        return value;
+      },
+    });
+
+    const { participants, price, mood, lighting, praised, etc } = query;
+
+    /* 키워드 */
+    const keyword: KeywordSearchDto = {
+      participants: {
+        min: Number(participants['min']),
+        max: Number(participants['max']),
+      },
+      price: price.toString(),
+      praised: ReviewPraisedEnum[praised.toString()],
+      lighting: ReviewLightingEnum[lighting.toString()],
+      mood: ReviewMoodEnum[mood.toString()],
+      etc: {
+        is_cork_charge: etc['is_cork_charge'],
+        is_rent: etc['is_rent'],
+        is_room: etc['is_room'],
+        is_reservation: etc['is_reservation'],
+        is_parking: etc['is_parking'],
+        is_advance_payment: etc['is_advance_payment'],
+      },
+    };
+
+    return keyword;
   }
 }
