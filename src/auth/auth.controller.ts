@@ -58,8 +58,7 @@ export class AuthController {
     } = await this.authService.login(data);
     res.cookie('Authentication', accessToken, accessOption);
     res.cookie('Refresh', refreshToken, refreshOption);
-
-    return { nickname, userId };
+    return { nickname, userId, accessToken };
   }
 
   @Get('logout')
