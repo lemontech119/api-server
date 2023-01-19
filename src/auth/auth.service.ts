@@ -202,4 +202,19 @@ export class AuthService {
       },
     });
   }
+
+  async validationNickName(nickname: string): Promise<boolean> {
+    const ret = await this.userRepository.findOne({
+      where: {
+        nickname,
+      },
+      select: ['id'],
+    });
+
+    return !!ret;
+  }
+
+  async changeNickname(user: User, nickname: string) {
+    return await this.userRepository.update({ id: user.id }, { nickname });
+  }
 }
