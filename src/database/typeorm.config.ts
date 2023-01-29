@@ -12,6 +12,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   database: process.env.DB_NAME,
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
+  bigNumberStrings: false,
   migrationsTableName: 'custom_migration_table',
   migrations: ['src/migrations/*{.ts,.js}'],
   logging: false,
@@ -33,6 +34,7 @@ export const typeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
       database: process.env.DB_NAME,
       entities: [__dirname + '/../**/*.entity.{js,ts}'],
       synchronize: process.env.DB_SYNCHRONIZE === 'true',
+      bigNumberStrings: false,
       migrations: ['dist/migrations/*{.ts,.js}'],
       cli: {
         entitiesDir: __dirname + '/../**/*.entity.{js,ts}',
