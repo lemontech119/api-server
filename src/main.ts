@@ -10,6 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: winstonLogger,
   });
+  app.enableCors();
   app.use(cookieParser());
   const config = new DocumentBuilder()
     .setTitle('Bside 13th Team 2')
