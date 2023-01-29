@@ -214,7 +214,13 @@ export class AuthService {
     return !!ret;
   }
 
-  async changeNickname(user: User, nickname: string) {
-    return await this.userRepository.update({ id: user.id }, { nickname });
+  async updateNickname(user: User, nickname: string) {
+    user.nickname = nickname;
+    return await this.userRepository.update(
+      { id: user.id },
+      {
+        nickname: user.nickname,
+      },
+    );
   }
 }

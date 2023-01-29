@@ -30,6 +30,7 @@ import { JwtRefreshGuard } from './security/jwtRefresh.Guard';
 import { User } from 'src/auth/Entity/user.entity';
 import { GetUserDecorator } from './../decorator/get-user.decorator';
 import { UpdateResult } from 'typeorm';
+import { UpdateUserDto } from './dto/updateUser.dto';
 
 @ApiTags('auth Api')
 @Controller('auth')
@@ -135,11 +136,16 @@ export class AuthController {
     type: UpdateResult,
   })
   @UseGuards(AuthGuard)
-  async changeNickname(@Param() nickname: string, @GetUser() user: User) {
-    const ret = await this.authService.validationNickName(nickname);
+  async updateNickname(
+    @Param() updateUserDto: UpdateUserDto,
+    @GetUser() user: User,
+  ): Promise<void> {
+    const ret = await this.authService.validationNickName(
+      updateUserDto.nickname,
+    );
 
-    if (!ret) throw new ConflictException('Conflicting nickname');
+    if (ret) throw new ConflictException('Conflicting nickname');
 
-    return await this.authService.changeNickname(user, nickname);
+    await this.authService.updateNickname(user, updateUserDto.nickname);
   }
 }
