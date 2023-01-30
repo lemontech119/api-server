@@ -274,11 +274,11 @@ export class PlaceService {
 
     query.x = parseFloat(query.x);
     query.y = parseFloat(query.y);
-    query.participantsAvg = parseInt(query.participantsAvg);
-    query.moodCnt = parseInt(query.moodCnt);
-    query.lightingCnt = parseInt(query.lightingCnt);
-    query.praisedCnt = parseInt(query.praisedCnt);
-    query.wantPlaceCnt = parseInt(query.wantPlaceCnt);
+    // query.participantsAvg = parseInt(query.participantsAvg);
+    // query.moodCnt = parseInt(query.moodCnt);
+    // query.lightingCnt = parseInt(query.lightingCnt);
+    // query.praisedCnt = parseInt(query.praisedCnt);
+    // query.wantPlaceCnt = parseInt(query.wantPlaceCnt);
 
     const result: GetPlaceDetail = query;
 
