@@ -55,6 +55,11 @@ export class PlaceController {
     return isExists;
   }
 
+  @Get('/')
+  async findByAll(): Promise<Place[]> {
+    return await this.placeService.findAll();
+  }
+
   @Post('/')
   @ApiOperation({ summary: 'Create', description: 'create place data' })
   @ApiResponse({

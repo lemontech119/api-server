@@ -78,6 +78,10 @@ export class PlaceService {
     return result[0];
   }
 
+  async findByAllPlace() {
+    return await this.placeRepository.find();
+  }
+
   async findAll(): Promise<Place[]> {
     const ret = await this.placeRepository.find({
       where: {
