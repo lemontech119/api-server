@@ -2,7 +2,6 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 import {
   ReviewLightingEnum,
   ReviewMoodEnum,
-  ReviewPraisedEnum,
 } from 'src/review_mood/review_mood.enum';
 import { KeywordEtcSearchDto } from './keywordEtcSearch.dto';
 import { ApiProperty } from '@nestjs/swagger';
@@ -13,7 +12,7 @@ type Participants = {
 
 export class KeywordSearchDto {
   @ApiProperty({
-    example: '{main: 4, max: 8}',
+    example: '{min: 4, max: 8}',
     description: '참석인원 범위',
     type: JSON,
   })
@@ -47,15 +46,6 @@ export class KeywordSearchDto {
   @IsString()
   @IsOptional()
   lighting: ReviewLightingEnum;
-
-  @ApiProperty({
-    example: 'Cheep',
-    description: '칭찬',
-    type: ReviewPraisedEnum,
-  })
-  @IsString()
-  @IsOptional()
-  praised: ReviewPraisedEnum;
 
   @ApiProperty({
     description: '기타 조건',
