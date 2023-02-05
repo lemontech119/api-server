@@ -50,7 +50,6 @@ export class PlaceStatsService {
     return await this.placeStatsRepository.save({
       id: generateUuid(),
       lighting: null,
-      praised: null,
       mood: null,
       place,
     });

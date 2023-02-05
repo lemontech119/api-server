@@ -17,7 +17,6 @@ import * as qs from 'qs';
 import {
   ReviewLightingEnum,
   ReviewMoodEnum,
-  ReviewPraisedEnum,
 } from 'src/review_mood/review_mood.enum';
 @Injectable()
 export class PlaceService {
@@ -79,6 +78,10 @@ export class PlaceService {
     return result[0];
   }
 
+  async findByAllPlace() {
+    return await this.placeRepository.find();
+  }
+
   async findAll(): Promise<Place[]> {
     const ret = await this.placeRepository.find({
       where: {
@@ -125,7 +128,6 @@ export class PlaceService {
         'stats.review_cnt',
         'stats.mood as mood',
         'stats.lighting as lighting',
-        'stats.praised as praised',
         'COUNT(want.placeId) as wantplaceCnt',
       ])
       .getRawOne();
@@ -236,7 +238,6 @@ export class PlaceService {
         'stats.rating_avrg as ratingAvg',
         'stats.mood as mood',
         'stats.lighting as lighting',
-        'stats.praised as praised',
       ])
       .addSelect((sub) => {
         return sub
@@ -261,15 +262,6 @@ export class PlaceService {
           )
           .select('COUNT(B.mood)');
       }, 'lightingCnt')
-      .addSelect((sub) => {
-        return sub
-          .subQuery()
-          .from(PlaceStats, 'A')
-          .leftJoin(ReviewMood, 'B', 'B.placeId = :id AND A.praised = B.mood', {
-            id,
-          })
-          .select('COUNT(B.mood)');
-      }, 'praisedCnt')
       .getRawOne();
 
     query.x = parseFloat(query.x);
@@ -277,7 +269,6 @@ export class PlaceService {
     // query.participantsAvg = parseInt(query.participantsAvg);
     // query.moodCnt = parseInt(query.moodCnt);
     // query.lightingCnt = parseInt(query.lightingCnt);
-    // query.praisedCnt = parseInt(query.praisedCnt);
     // query.wantPlaceCnt = parseInt(query.wantPlaceCnt);
 
     const result: GetPlaceDetail = query;
@@ -288,8 +279,7 @@ export class PlaceService {
   async placeKeywordSearch(
     keyword: KeywordSearchDto,
   ): Promise<GetPlaceSearch[]> {
-    const { participants, price, mood, lighting, praised, etc } = keyword;
-
+    const { participants, price, mood, lighting, etc } = keyword;
     const placeId = this.dataSource
       .createQueryBuilder()
       .subQuery()
@@ -396,7 +386,6 @@ export class PlaceService {
       .addSelect([
         'B.mood as mood',
         'B.lighting as lighting',
-        'B.praised as praised',
         'B.review_cnt as review_cnt',
         'B.rating_avrg as rating_avrg',
       ])
@@ -407,8 +396,7 @@ export class PlaceService {
         (
           A.participantsAvg >= :min AND
           A.participantsAvg <= :max AND
-          A.price_range = :price AND
-          B.praised = :praised
+          A.price_range = :price
           )
          AND
          (
@@ -417,19 +405,18 @@ export class PlaceService {
           )
           AND
           (
-          A.is_cork_charge = :is_cork_charge AND
-          A.is_rent = :is_rent AND
-          A.is_room = :is_room AND
-          A.is_reservation = :is_reservation AND
-          A.is_parking = :is_parking AND
-          A.is_advance_payment = :is_advance_payment
+          C.is_cork_charge = :is_cork_charge AND
+          C.is_rent = :is_rent AND
+          C.is_room = :is_room AND
+          C.is_reservation = :is_reservation AND
+          C.is_parking = :is_parking AND
+          C.is_advance_payment = :is_advance_payment
           )
         `,
         {
           min: participants.min,
           max: participants.max,
           price,
-          praised,
           lighting,
           mood,
           is_cork_charge: etc.is_cork_charge,
@@ -472,7 +459,7 @@ export class PlaceService {
       },
     });
 
-    const { participants, price, mood, lighting, praised, etc } = query;
+    const { participants, price, mood, lighting, etc } = query;
 
     /* 키워드 */
     const keyword: KeywordSearchDto = {
@@ -481,7 +468,6 @@ export class PlaceService {
         max: Number(participants['max']),
       },
       price: price.toString(),
-      praised: ReviewPraisedEnum[praised.toString()],
       lighting: ReviewLightingEnum[lighting.toString()],
       mood: ReviewMoodEnum[mood.toString()],
       etc: {

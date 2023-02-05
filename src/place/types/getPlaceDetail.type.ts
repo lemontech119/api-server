@@ -193,22 +193,6 @@ export class GetPlaceDetail {
   lightingCnt: number;
 
   @ApiProperty({
-    example: '음식이 맛있는',
-    description: '칭찬',
-  })
-  @IsNotEmpty()
-  @IsString()
-  praised: string;
-
-  @ApiProperty({
-    example: '11',
-    description: '칭찬 개수',
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  praisedCnt: number;
-
-  @ApiProperty({
     example: '20',
     description: '가고 싶은 곳 개수',
   })

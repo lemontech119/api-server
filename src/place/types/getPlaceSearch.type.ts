@@ -83,14 +83,6 @@ export class GetPlaceSearch {
   lighting: string;
 
   @ApiProperty({
-    example: '음식이 맛있는',
-    description: '칭찬',
-  })
-  @IsNotEmpty()
-  @IsString()
-  praised: string;
-
-  @ApiProperty({
     example: '20',
     description: '가고 싶은 곳 개수',
   })

@@ -4,10 +4,10 @@ export enum MoodEnum {
   Heavy = '무거운',
   Bright = '밝은',
   Dark = '어두운',
-  Clean = '청결한 위생상태',
-  KindWoker = '친절한 직원',
-  Delicious = '맛있는 음식',
-  Cheap = '좋은 가성비',
+  // Clean = '청결한 위생상태',
+  // KindWoker = '친절한 직원',
+  // Delicious = '맛있는 음식',
+  // Cheap = '좋은 가성비',
 }
 
 export enum ReviewMoodEnum {
@@ -22,15 +22,15 @@ export enum ReviewLightingEnum {
   Dark = '어두운',
 }
 
-export enum ReviewPraisedEnum {
-  Clean = '청결한 위생상태',
-  KindWoker = '친절한 직원',
-  Delicious = '맛있는 음식',
-  Cheap = '좋은 가성비',
-}
+// export enum ReviewPraisedEnum {
+//   Clean = '청결한 위생상태',
+//   KindWoker = '친절한 직원',
+//   Delicious = '맛있는 음식',
+//   Cheap = '좋은 가성비',
+// }
 
 export enum ReviewCategoryMoodEnum {
   Mood = 'mood',
   Lighting = 'lighting',
-  Praised = 'praised',
+  // Praised = 'praised',
 }

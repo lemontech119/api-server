@@ -1,11 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Place } from 'src/place/Entity/place.entity';
-import {
-  MoodEnum,
-  ReviewLightingEnum,
-  ReviewMoodEnum,
-  ReviewPraisedEnum,
-} from 'src/review_mood/review_mood.enum';
+import { MoodEnum } from 'src/review_mood/review_mood.enum';
 import {
   Column,
   CreateDateColumn,
@@ -63,13 +58,6 @@ export class PlaceStats {
   })
   @Column({ nullable: true })
   lighting: MoodEnum;
-
-  @ApiProperty({
-    example: '직원이 친절함',
-    description: '칭찬',
-  })
-  @Column({ nullable: true })
-  praised: MoodEnum;
 
   @ApiProperty({
     required: false,
