@@ -28,7 +28,7 @@ export class PlaceService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async isExistsByKakaoId(kakaoId: string): Promise<boolean> {
+  async isExistsByKakaoId(kakaoId: string): Promise<string> {
     const ret = await this.placeRepository.findOne({
       where: {
         kakaoId,
@@ -36,7 +36,7 @@ export class PlaceService {
       select: ['id'],
     });
 
-    return !!ret;
+    return ret?.id || '';
   }
 
   async isExistsById(id: string): Promise<boolean> {
