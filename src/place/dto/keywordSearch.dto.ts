@@ -5,6 +5,7 @@ import {
 } from 'src/review_mood/review_mood.enum';
 import { KeywordEtcSearchDto } from './keywordEtcSearch.dto';
 import { ApiProperty } from '@nestjs/swagger';
+
 type Participants = {
   min: number;
   max: number;
