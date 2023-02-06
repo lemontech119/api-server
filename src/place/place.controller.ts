@@ -20,7 +20,6 @@ import { PlaceService } from './place.service';
 import { PlaceInfoService } from './placeInfo.service';
 import { AddPlace } from './dto/addPlace.dto';
 import { Place } from './Entity/place.entity';
-import { KeywordSearchDto } from './dto/keywordSearch.dto';
 import { PlaceInfo } from './Entity/placeInfo.entity';
 import { GetAllPlace } from './types/getAllPlace.type';
 import { GetPlaceDetail } from './types/getPlaceDetail.type';
@@ -143,9 +142,6 @@ export class PlaceController {
     name: 'kakaoId',
     required: true,
     type: String,
-  })
-  @ApiBody({
-    type: KeywordSearchDto,
   })
   @ApiResponse({
     description: 'Get Place Search Data',
