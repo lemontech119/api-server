@@ -18,6 +18,7 @@ import {
 import { PlaceService } from './place.service';
 import { PlaceInfoService } from './placeInfo.service';
 import { AddPlace } from './dto/addPlace.dto';
+import { ExistsPlace } from './dto/existsPlace.dto';
 import { Place } from './Entity/place.entity';
 import { PlaceInfo } from './Entity/placeInfo.entity';
 import { GetAllPlace } from './types/getAllPlace.type';
@@ -43,16 +44,18 @@ export class PlaceController {
     description: '카카오 장소 id',
   })
   @ApiResponse({
-    description: '장소 저장 여부',
-    type: Boolean,
+    description: '장소저장 시에 uuid 반환, 없는 경우 id 빈값',
+    type: ExistsPlace,
     status: 200,
   })
   async isExsitsKakaoPlace(
     @Param('kakaoId') kakaoId: string,
-  ): Promise<boolean> {
-    const isExists = await this.placeService.isExistsByKakaoId(kakaoId);
+  ): Promise<ExistsPlace> {
+    const id = await this.placeService.isExistsByKakaoId(kakaoId);
 
-    return isExists;
+    return {
+      id,
+    };
   }
 
   @Get('/')
