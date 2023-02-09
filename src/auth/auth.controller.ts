@@ -148,4 +148,10 @@ export class AuthController {
 
     await this.authService.updateNickname(user, updateUserDto.nickname);
   }
+
+  @Get('/')
+  @UseGuards(AuthGuard)
+  async getUser(@GetUser() user: User): Promise<User> {
+    return user;
+  }
 }
