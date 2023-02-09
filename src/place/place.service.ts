@@ -83,14 +83,23 @@ export class PlaceService {
   }
 
   async findAll(): Promise<Place[]> {
-    const ret = await this.placeRepository.find({
-      where: {
-        place_review: true,
-      },
-      select: ['id', 'x', 'y', 'name'],
-    });
+    // const ret = await this.placeRepository.find({
+    //   where: {
+    //     place_review: true,
+    //   },
+    //   select: ['id', 'x', 'y'],
+    //   relations: { place_review: true },
+    // });
 
-    return ret;
+    const query = await this.placeRepository
+      .createQueryBuilder('p')
+      .leftJoin(PlaceReview, 'r', 'p.id = r.placeId')
+      .groupBy('r.placeId')
+      .having('r.placeId IS NOT NULL')
+      .select(['p.id AS id', 'p.x As x', 'p.y As y', 'p.name AS place_name'])
+      .getRawMany();
+
+    return query;
   }
 
   async findByIdList(idList: string[]): Promise<Place[]> {
