@@ -121,4 +121,18 @@ export class PlaceReviewService {
       where: { id },
     });
   }
+
+  async findByUser(userInfo: User): Promise<PlaceReview[]> {
+    return await this.placeReviewRepository.find({
+      relations: {
+        place: true,
+      },
+      where: {
+        user: {
+          id: userInfo.id,
+        },
+      },
+      order: { createdAt: 'DESC' },
+    });
+  }
 }

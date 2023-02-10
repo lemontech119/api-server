@@ -136,4 +136,21 @@ export class PlaceReviewController {
     const result = await this.placeService.findById(placeId);
     return result;
   }
+
+  @ApiOperation({
+    summary: 'Get my Review List',
+    description: '내가 가본 곳 목록 Result',
+  })
+  @ApiHeader({ name: 'Authorization', description: 'auth token' })
+  @ApiResponse({
+    status: 200,
+    description: 'PlaceReview list',
+    type: PlaceReview,
+    isArray: true,
+  })
+  @Get('/my/list')
+  @UseGuards(AuthGuard)
+  async findByUser(@GetUser() user: User) {
+    return this.placeReviewService.findByUser(user);
+  }
 }
