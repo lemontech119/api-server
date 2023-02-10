@@ -20,7 +20,10 @@ export class ChartController {
     }
 
     const places = await this.placeService.findByIdList(placeIdList);
-
+    places.map((place) => {
+      place['place_name'] = place['name'];
+      delete place['name'];
+    });
     return places;
   }
 }
